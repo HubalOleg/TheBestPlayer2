@@ -47,7 +47,7 @@ public class MusicService extends Service {
     private MediaSession mSession;
     private MediaController mController;
 
-    private int mCurrentPosition = 0;
+    private int mCurrentPosition = -1;
     private boolean isPlaying = false;
 
     private List<TrackItem> mTrackItems;
@@ -74,7 +74,7 @@ public class MusicService extends Service {
     private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
-
+            nextTrack();
         }
     };
 
@@ -152,25 +152,25 @@ public class MusicService extends Service {
             @Override
             public void onPlay() {
                 super.onPlay();
-                Log.d(TAG, "onPlay: ");
+                resumeTrack();
             }
 
             @Override
             public void onPause() {
                 super.onPause();
-                Log.d(TAG, "onPause: ");
+                pauseTrack();
             }
 
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
-                Log.d(TAG, "onSkipToNext: ");
+                nextTrack();
             }
 
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
-                Log.d(TAG, "onSkipToPrevious: ");
+                previousTrack();
             }
 
             @Override
@@ -230,6 +230,7 @@ public class MusicService extends Service {
     }
 
     private void playTrack() {
+        Log.d(TAG, "playTrack: " + mCurrentPosition);
         String path = mTrackItems.get(mCurrentPosition).getPath();
         try {
             mMediaPlayer.reset();
@@ -237,6 +238,32 @@ public class MusicService extends Service {
             mMediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void nextTrack() {
+        mCurrentPosition++;
+        if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
+        playTrack();
+    }
+
+    private void previousTrack() {
+        mCurrentPosition--;
+        if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
+        playTrack();
+    }
+
+    private void pauseTrack() {
+        if (mMediaPlayer != null && isPlaying) {
+            mMediaPlayer.pause();
+            isPlaying = false;
+        }
+    }
+
+    private void resumeTrack() {
+        if (mMediaPlayer != null && !isPlaying) {
+            mMediaPlayer.start();
+            isPlaying = true;
         }
     }
 

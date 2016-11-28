@@ -13,7 +13,6 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.MusicService;
@@ -37,7 +36,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private List<TrackItem> mTrackItems;
 
     private MusicService mMusicService;
-    private int mCurrentPosition = 0;
+    private int mCurrentPosition = -1;
 
     private boolean isServiceBound = false;
 
@@ -72,7 +71,6 @@ public class TrackListPresenter implements TrackListPresenterContract {
             mMusicService = binder.getService();
 
             if (mMusicService.isTrackListExist()) {
-                Log.d(TAG, "onServiceConnected: " + mMusicService.isTrackListExist());
                 mView.setTrackItems(mMusicService.getTrackItems());
             }
 
@@ -115,12 +113,12 @@ public class TrackListPresenter implements TrackListPresenterContract {
     }
 
     private void changeTrack() {
-        mMusicService.playTrackByPosition(mCurrentPosition);
-        mView.setSelectedItem(mCurrentPosition);
+        if (mMusicService != null) {
+            mMusicService.playTrackByPosition(mCurrentPosition);
+        }
     }
 
     private void launchService() {
-        mIntent.setAction(MusicService.ACTION_PLAY);
         mContext.startService(mIntent);
         mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
     }
