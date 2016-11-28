@@ -36,6 +36,9 @@ public class MusicService extends Service {
     public static final String ACTION_PREVIOUS = "com.oleg.hubal.thebestplayer.INTENT_PLAY_PAUSE";
     public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
 
+    public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
+    public static final String PARAM_ACTION = "action";
+
     private static final int NOTIFICATION_ID = 1121;
 
     private final IBinder mMusicBind = new MusicBinder();
@@ -119,21 +122,32 @@ public class MusicService extends Service {
 
         switch (action) {
             case ACTION_PLAY:
+                sendActionBroadcast(ACTION_PLAY);
                 mController.getTransportControls().play();
                 break;
             case ACTION_PAUSE:
+                sendActionBroadcast(ACTION_PAUSE);
                 mController.getTransportControls().pause();
                 break;
             case ACTION_NEXT:
+                sendActionBroadcast(ACTION_NEXT);
                 mController.getTransportControls().skipToNext();
                 break;
             case ACTION_PREVIOUS:
+                sendActionBroadcast(ACTION_PREVIOUS);
                 mController.getTransportControls().skipToPrevious();
                 break;
             case ACTION_STOP:
+                sendActionBroadcast(ACTION_STOP);
                 mController.getTransportControls().stop();
                 break;
         }
+    }
+
+    private void sendActionBroadcast(String action) {
+        Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastIntent.putExtra(PARAM_ACTION, action);
+        sendBroadcast(broadcastIntent);
     }
 
     private void initMediaPlayer() {
@@ -176,10 +190,7 @@ public class MusicService extends Service {
             @Override
             public void onStop() {
                 super.onStop();
-                mMediaPlayer.stop();
-                mMediaPlayer.release();
-
-                isPlaying = false;
+                stopMedia();
 
                 Intent intent = new Intent(getApplicationContext(), MusicService.class);
                 stopService(intent);
@@ -267,6 +278,14 @@ public class MusicService extends Service {
         }
     }
 
+    private void stopMedia() {
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        isPlaying = false;
+
+
+    }
+
     private void updateNotification() {
         String artist = mTrackItems.get(mCurrentPosition).getArtist();
         String title = mTrackItems.get(mCurrentPosition).getTitle();
@@ -291,6 +310,14 @@ public class MusicService extends Service {
 
     public boolean isTrackListExist() {
         return (mTrackItems != null);
+    }
+
+    public interface OnPlayerActionListener {
+        void play();
+        void pause();
+        void next();
+        void previous();
+        void stop();
     }
 
     public class MusicBinder extends Binder {

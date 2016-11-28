@@ -5,6 +5,5 @@ package com.oleg.hubal.thebestplayer.presenter;
  */
 
 public interface BasePresenter {
-
     void onStop();
 }

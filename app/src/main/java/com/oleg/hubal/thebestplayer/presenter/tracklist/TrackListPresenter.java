@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,14 +14,18 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
+import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
 import com.oleg.hubal.thebestplayer.service.MusicService;
 import com.oleg.hubal.thebestplayer.utility.Utils;
 import com.oleg.hubal.thebestplayer.view.tracklist.TrackListViewContract;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.oleg.hubal.thebestplayer.service.MusicService.OnPlayerActionListener;
 
 /**
  * Created by User on 22.11.2016.
@@ -35,12 +40,43 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private TrackListViewContract mView;
     private List<TrackItem> mTrackItems;
 
+    private AudioPlayerReceiver mPlayerReceiver;
+
     private MusicService mMusicService;
     private int mCurrentPosition = -1;
 
     private boolean isServiceBound = false;
 
 //    CALLBACK
+
+    private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
+        @Override
+        public void play() {
+
+        }
+
+        @Override
+        public void pause() {
+            Log.d(TAG, "pause: " + "mageeeeg");
+        }
+
+        @Override
+        public void next() {
+            mCurrentPosition++;
+            mView.setSelectedItem(mCurrentPosition);
+        }
+
+        @Override
+        public void previous() {
+            mCurrentPosition--;
+            mView.setSelectedItem(mCurrentPosition);
+        }
+
+        @Override
+        public void stop() {
+
+        }
+    };
 
     private LoaderManager.LoaderCallbacks<Cursor> mCursorLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
@@ -70,6 +106,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
 
+            IntentFilter filter = new IntentFilter(MusicService.BROADCAST_ACTION);
+            mContext.registerReceiver(mPlayerReceiver, filter);
+
             if (mMusicService.isTrackListExist()) {
                 mView.setTrackItems(mMusicService.getTrackItems());
             }
@@ -96,6 +135,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     public TrackListPresenter(Context context, TrackListViewContract view) {
         mContext = context;
         mView = view;
+        mPlayerReceiver = new AudioPlayerReceiver(mOnPlayerActionListener);
         mIntent = new Intent(mContext, MusicService.class);
         bindServiceIfRunning();
     }
@@ -184,6 +224,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     public void onPause() {
         if (isServiceBound) {
             mContext.unbindService(mMusicConnection);
+            mContext.unregisterReceiver(mPlayerReceiver);
             isServiceBound = false;
         }
     }
