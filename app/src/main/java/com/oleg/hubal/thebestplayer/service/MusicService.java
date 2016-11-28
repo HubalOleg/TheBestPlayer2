@@ -2,15 +2,22 @@ package com.oleg.hubal.thebestplayer.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
+import com.oleg.hubal.thebestplayer.view.MainActivity;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,13 +28,25 @@ import java.util.List;
 
 public class MusicService extends Service {
 
+    private static final String TAG = "MusicService";
+
+    public static final String ACTION_PLAY = "com.oleg.hubal.thebestplayer.INTENT_PLAY";
+    public static final String ACTION_PAUSE = "com.oleg.hubal.thebestplayer.INTENT_PAUSE";
+    public static final String ACTION_NEXT = "com.oleg.hubal.thebestplayer.INTENT_NEXT";
+    public static final String ACTION_PREVIOUS = "com.oleg.hubal.thebestplayer.INTENT_PLAY_PAUSE";
+    public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
+
     private static final int NOTIFICATION_ID = 1121;
 
     private final IBinder mMusicBind = new MusicBinder();
 
-    private Notification.Builder mNotificationBuilder;
+    private NotificationCompat.Builder mNotificationBuilder;
 
     private MediaPlayer mMediaPlayer;
+    private MediaSessionManager mManager;
+    private MediaSession mSession;
+    private MediaController mController;
+
     private int mCurrentPosition = 0;
     private boolean isPlaying = false;
 
@@ -69,24 +88,140 @@ public class MusicService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        mSession.release();
         return false;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        initMediaPlayer();
+
+        initMediaSession();
+
+        createNotification();
+        startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        handleIntent(intent);
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent == null || intent.getAction() == null)
+            return;
+
+        String action = intent.getAction();
+
+        switch (action) {
+            case ACTION_PLAY:
+                mController.getTransportControls().play();
+                break;
+            case ACTION_PAUSE:
+                mController.getTransportControls().pause();
+                break;
+            case ACTION_NEXT:
+                mController.getTransportControls().skipToNext();
+                break;
+            case ACTION_PREVIOUS:
+                mController.getTransportControls().skipToPrevious();
+                break;
+            case ACTION_STOP:
+                mController.getTransportControls().stop();
+                break;
+        }
+    }
+
+    private void initMediaPlayer() {
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
         mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
         mMediaPlayer.setOnErrorListener(mOnErrorListener);
+    }
 
-        createNotification();
-        startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
-        return super.onStartCommand(intent, flags, startId);
+    private void initMediaSession() {
+        mManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mSession = new MediaSession(getApplicationContext(), "simple player session");
+        mController = new MediaController(getApplicationContext(), mSession.getSessionToken());
+
+        mSession.setCallback(new MediaSession.Callback(){
+            @Override
+            public void onPlay() {
+                super.onPlay();
+                Log.d(TAG, "onPlay: ");
+            }
+
+            @Override
+            public void onPause() {
+                super.onPause();
+                Log.d(TAG, "onPause: ");
+            }
+
+            @Override
+            public void onSkipToNext() {
+                super.onSkipToNext();
+                Log.d(TAG, "onSkipToNext: ");
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                super.onSkipToPrevious();
+                Log.d(TAG, "onSkipToPrevious: ");
+            }
+
+            @Override
+            public void onStop() {
+                super.onStop();
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
+
+                isPlaying = false;
+
+                Intent intent = new Intent(getApplicationContext(), MusicService.class);
+                stopService(intent);
+
+                Intent in = new Intent(getApplicationContext(), MainActivity.class);
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(in);
+            }
+        });
+    }
+
+    private NotificationCompat.Action generateAction(int icon, String title, String intentAction) {
+        Intent intent = new Intent(getApplicationContext(), MusicService.class);
+        intent.setAction(intentAction);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1, intent, 0);
+
+        return new NotificationCompat.Action.Builder(icon, title, pendingIntent).build();
+    }
+
+    private void createNotification() {
+        Intent notifyIntent = new Intent(getApplicationContext(), MainActivity.class);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent notifyPendingIntent =
+                PendingIntent.getActivity(
+                        getApplicationContext(),
+                        0,
+                        notifyIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mNotificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle("Track title")
+                .setContentText("Artist - album")
+                .setContentIntent(notifyPendingIntent)
+                .setAutoCancel(false)
+                .setPriority(Notification.PRIORITY_MAX)
+                .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
+                .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY))
+                .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE))
+                .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
+                .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", ACTION_STOP))
+                .setStyle(new NotificationCompat.MediaStyle().setShowCancelButton(true));
     }
 
     public void playTrackByPosition(int position) {
@@ -103,15 +238,6 @@ public class MusicService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void createNotification() {
-        mNotificationBuilder = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentTitle("Track title")
-                .setContentText("Artist - album")
-                .setAutoCancel(true)
-                .setStyle(new Notification.MediaStyle());
     }
 
     private void updateNotification() {

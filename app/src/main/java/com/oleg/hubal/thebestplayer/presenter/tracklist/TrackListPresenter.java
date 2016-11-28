@@ -120,6 +120,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     }
 
     private void launchService() {
+        mIntent.setAction(MusicService.ACTION_PLAY);
         mContext.startService(mIntent);
         mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
     }
