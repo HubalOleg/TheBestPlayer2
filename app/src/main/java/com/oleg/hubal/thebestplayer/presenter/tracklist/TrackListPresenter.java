@@ -173,20 +173,10 @@ public class TrackListPresenter implements TrackListPresenterContract {
     }
 
     @Override
-    public TrackItem getTrackItemByPosition(int position) {
-        return mTrackItems.get(position);
-    }
-
-    @Override
     public void onFillTrackList() {
         if (!Utils.isServiceRunning(MusicService.class.getName(), mContext)) {
             mView.launchTrackListLoader();
         }
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        return mCurrentPosition;
     }
 
     private CursorLoader createCursorLoader() {

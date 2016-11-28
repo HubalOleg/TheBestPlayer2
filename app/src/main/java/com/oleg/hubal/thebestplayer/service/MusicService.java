@@ -236,6 +236,7 @@ public class MusicService extends Service {
     }
 
     private void playTrack() {
+        mTrackItems.get(mCurrentPosition).setSelected(true);
         String path = mTrackItems.get(mCurrentPosition).getPath();
         try {
             mMediaPlayer.reset();
@@ -247,6 +248,7 @@ public class MusicService extends Service {
     }
 
     private void nextTrack() {
+        unSelectPrevious();
         mCurrentPosition++;
         if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
         playTrack();
@@ -254,10 +256,15 @@ public class MusicService extends Service {
     }
 
     private void previousTrack() {
+        unSelectPrevious();
         mCurrentPosition--;
         if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
         playTrack();
         sendActionBroadcast(ACTION_PREVIOUS);
+    }
+
+    private void unSelectPrevious() {
+        mTrackItems.get(mCurrentPosition).setSelected(false);
     }
 
     private void pauseTrack() {
