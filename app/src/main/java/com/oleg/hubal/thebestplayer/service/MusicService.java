@@ -110,6 +110,7 @@ public class MusicService extends Service {
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setContentTitle("Track title")
                 .setContentText("Artist - album")
+                .setAutoCancel(true)
                 .setStyle(new Notification.MediaStyle());
     }
 
