@@ -15,7 +15,7 @@ public interface TrackListPresenterContract extends BasePresenter {
     LoaderManager.LoaderCallbacks<Cursor> getTrackListLoader();
     TrackItem getTrackItemByPosition(int position);
     int getCurrentPosition();
-    void onRequestItemsFromService();
+    void onFillTrackList();
     void onTrackSelected(int position);
     void onPause();
     void onResume();

@@ -13,5 +13,6 @@ public interface TrackListViewContract {
     void showTrackList(List<TrackItem> trackList);
     void setSelectedItem(int position);
     void setTrackItems(List<TrackItem> trackItems);
+    void launchTrackListLoader();
 
 }

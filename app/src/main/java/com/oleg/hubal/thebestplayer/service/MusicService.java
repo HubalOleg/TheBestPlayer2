@@ -139,6 +139,10 @@ public class MusicService extends Service {
         return isPlaying;
     }
 
+    public boolean isTrackListExist() {
+        return (mTrackItems != null);
+    }
+
     public class MusicBinder extends Binder {
         public MusicService getService() {
             return MusicService.this;

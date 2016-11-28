@@ -61,11 +61,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public void setTrackSelected(int position) {
         if (mActivePosition != -1) {
             mTrackItems.get(mActivePosition).setSelected(false);
-            mViewHolders[mActivePosition].changeSelection(false);
+            mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
         }
 
         mTrackItems.get(position).setSelected(true);
-        mViewHolders[position].changeSelection(true);
+        mViewHolders[position].changeSelection(mTrackItems.get(position).isSelected());
 
         mActivePosition = position;
     }
@@ -95,6 +95,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             Picasso.with(mContext).load(trackItem.getAlbumImage()).into(mAlbumArtImageView);
             mArtistTextView.setText(trackItem.getArtist());
             mTitleTextView.setText(trackItem.getTitle());
+
+            mItemView.setSelected(trackItem.isSelected());
+
+            if (trackItem.isSelected())
+                mActivePosition = position;
 
             mItemView.setOnClickListener(new View.OnClickListener() {
                 @Override

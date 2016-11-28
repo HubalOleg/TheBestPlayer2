@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.MusicService;
@@ -69,6 +70,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
+
+            if (mMusicService.isTrackListExist()) {
+                Log.d(TAG, "onServiceConnected: " + mMusicService.isTrackListExist());
+                mView.setTrackItems(mMusicService.getTrackItems());
+            }
 
             isServiceBound = true;
 
@@ -129,9 +135,10 @@ public class TrackListPresenter implements TrackListPresenterContract {
     }
 
     @Override
-    public void onRequestItemsFromService() {
-        mView.setTrackItems(mTrackItems);
-        mView.setSelectedItem(mMusicService.getCurrentPosition());
+    public void onFillTrackList() {
+        if (!Utils.isServiceRunning(MusicService.class.getName(), mContext)) {
+            mView.launchTrackListLoader();
+        }
     }
 
     @Override

@@ -81,7 +81,7 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         mTrackListAdapter = new TrackListAdapter(getContext(), mOnTrackItemClickListener);
         trackRecyclerView.setAdapter(mTrackListAdapter);
 
-        launchTrackListLoader();
+        mPresenter.onFillTrackList();
 
         return view;
     }
@@ -96,7 +96,8 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         mTrackListAdapter.setData(trackItems);
     }
 
-    private void launchTrackListLoader() {
+    @Override
+    public void launchTrackListLoader() {
         getLoaderManager().initLoader(0, null, mPresenter.getTrackListLoader());
     }
 
