@@ -14,7 +14,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.view.MainActivity;
@@ -35,6 +34,7 @@ public class MusicService extends Service {
     public static final String ACTION_NEXT = "com.oleg.hubal.thebestplayer.INTENT_NEXT";
     public static final String ACTION_PREVIOUS = "com.oleg.hubal.thebestplayer.INTENT_PLAY_PAUSE";
     public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
+    public static final String ACTION_CHANGE_TRACK = "com.oleg.hubal.thebestplayer.INTENT_CHANGE_TRACK";
 
     public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
     public static final String PARAM_ACTION = "action";
@@ -122,23 +122,18 @@ public class MusicService extends Service {
 
         switch (action) {
             case ACTION_PLAY:
-                sendActionBroadcast(ACTION_PLAY);
                 mController.getTransportControls().play();
                 break;
             case ACTION_PAUSE:
-                sendActionBroadcast(ACTION_PAUSE);
                 mController.getTransportControls().pause();
                 break;
             case ACTION_NEXT:
-                sendActionBroadcast(ACTION_NEXT);
                 mController.getTransportControls().skipToNext();
                 break;
             case ACTION_PREVIOUS:
-                sendActionBroadcast(ACTION_PREVIOUS);
                 mController.getTransportControls().skipToPrevious();
                 break;
             case ACTION_STOP:
-                sendActionBroadcast(ACTION_STOP);
                 mController.getTransportControls().stop();
                 break;
         }
@@ -241,7 +236,6 @@ public class MusicService extends Service {
     }
 
     private void playTrack() {
-        Log.d(TAG, "playTrack: " + mCurrentPosition);
         String path = mTrackItems.get(mCurrentPosition).getPath();
         try {
             mMediaPlayer.reset();
@@ -256,18 +250,21 @@ public class MusicService extends Service {
         mCurrentPosition++;
         if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
         playTrack();
+        sendActionBroadcast(ACTION_NEXT);
     }
 
     private void previousTrack() {
         mCurrentPosition--;
         if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
         playTrack();
+        sendActionBroadcast(ACTION_PREVIOUS);
     }
 
     private void pauseTrack() {
         if (mMediaPlayer != null && isPlaying) {
             mMediaPlayer.pause();
             isPlaying = false;
+            sendActionBroadcast(ACTION_PAUSE);
         }
     }
 
@@ -275,6 +272,7 @@ public class MusicService extends Service {
         if (mMediaPlayer != null && !isPlaying) {
             mMediaPlayer.start();
             isPlaying = true;
+            sendActionBroadcast(ACTION_PLAY);
         }
     }
 
@@ -282,8 +280,7 @@ public class MusicService extends Service {
         mMediaPlayer.stop();
         mMediaPlayer.release();
         isPlaying = false;
-
-
+        sendActionBroadcast(ACTION_STOP);
     }
 
     private void updateNotification() {
@@ -310,14 +307,6 @@ public class MusicService extends Service {
 
     public boolean isTrackListExist() {
         return (mTrackItems != null);
-    }
-
-    public interface OnPlayerActionListener {
-        void play();
-        void pause();
-        void next();
-        void previous();
-        void stop();
     }
 
     public class MusicBinder extends Binder {

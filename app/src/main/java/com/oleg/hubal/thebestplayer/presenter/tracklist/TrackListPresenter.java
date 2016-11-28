@@ -19,13 +19,12 @@ import android.util.Log;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
 import com.oleg.hubal.thebestplayer.service.MusicService;
+import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
 import com.oleg.hubal.thebestplayer.utility.Utils;
 import com.oleg.hubal.thebestplayer.view.tracklist.TrackListViewContract;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.oleg.hubal.thebestplayer.service.MusicService.OnPlayerActionListener;
 
 /**
  * Created by User on 22.11.2016.
@@ -63,12 +62,17 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void next() {
             mCurrentPosition++;
+            if (mCurrentPosition >= mTrackItems.size())
+                mCurrentPosition = 0;
             mView.setSelectedItem(mCurrentPosition);
         }
 
         @Override
         public void previous() {
             mCurrentPosition--;
+            if (mCurrentPosition < 0)
+                mCurrentPosition = mTrackItems.size() - 1;
+
             mView.setSelectedItem(mCurrentPosition);
         }
 

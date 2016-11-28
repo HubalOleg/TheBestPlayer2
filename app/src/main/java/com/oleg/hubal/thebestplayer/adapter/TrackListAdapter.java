@@ -64,8 +64,12 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
         }
 
+
+
         mTrackItems.get(position).setSelected(true);
-        mViewHolders[position].changeSelection(mTrackItems.get(position).isSelected());
+        if (mViewHolders[position] != null) {
+            mViewHolders[position].changeSelection(mTrackItems.get(position).isSelected());
+        }
 
         mActivePosition = position;
     }

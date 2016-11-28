@@ -4,15 +4,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
+
 /**
  * Created by User on 28.11.2016.
  */
 
 public class AudioPlayerReceiver extends BroadcastReceiver {
 
-    MusicService.OnPlayerActionListener mOnPlayerActionListener;
+   OnPlayerActionListener mOnPlayerActionListener;
 
-    public AudioPlayerReceiver(MusicService.OnPlayerActionListener onPlayerActionListener) {
+    public AudioPlayerReceiver(OnPlayerActionListener onPlayerActionListener) {
         mOnPlayerActionListener = onPlayerActionListener;
     }
 
