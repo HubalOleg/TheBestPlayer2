@@ -42,17 +42,17 @@
         android:layout_centerHorizontal="true"
         android:orientation="horizontal">
         <ImageButton
-            android:id="@+id/ibtn_track_loop"
-            android:src="@android:drawable/ic_menu_rotate"
+            android:id="@+id/btn_previous_track"
+            android:src="@android:drawable/ic_media_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageButton
-            android:id="@+id/ibtn_play_pause"
-            android:src="@android:drawable/ic_media_play"
+            android:id="@+id/btn_play_pause"
+            android:src="@drawable/player_pause_play_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageButton
-            android:id="@+id/ibtn_next_track"
+            android:id="@+id/btn_next_track"
             android:src="@android:drawable/ic_media_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

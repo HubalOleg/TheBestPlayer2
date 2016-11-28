@@ -38,31 +38,33 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
         @Override
         public void play() {
-
+            mView.onUpdatePlayPauseButton(true);
         }
 
         @Override
         public void pause() {
+            mView.onUpdatePlayPauseButton(false);
 
         }
 
         @Override
         public void next() {
-
+            mView.onUpdatePlayPauseButton(true);
         }
 
         @Override
         public void previous() {
-
+            mView.onUpdatePlayPauseButton(true);
         }
 
         @Override
         public void stop() {
-
+            mView.onUpdatePlayPauseButton(false);
         }
 
         @Override
         public void changeTrack() {
+            mView.onUpdatePlayPauseButton(true);
             if (isServiceBound) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);

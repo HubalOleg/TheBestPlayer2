@@ -31,7 +31,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     private TextView mTrackPositionTextView;
     private TextView mTrackDurationTextView;
     private ImageButton mPlayPauseImageButton;
-    private ImageButton mTrackLoopImageButton;
+    private ImageButton mPreviousTrackImageButton;
     private ImageButton mNextTrackImageButton;
 
     public static AudioPlayerFragment newInstance() {
@@ -64,9 +64,9 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         mTrackInfoTextView = (TextView) view.findViewById(R.id.tv_track_info);
         mTrackDurationTextView = (TextView) view.findViewById(R.id.tv_track_duration);
         mTrackPositionTextView = (TextView) view.findViewById(R.id.tv_track_current_position);
-        mPlayPauseImageButton = (ImageButton) view.findViewById(R.id.ibtn_play_pause);
-        mTrackLoopImageButton = (ImageButton) view.findViewById(R.id.ibtn_track_loop);
-        mNextTrackImageButton = (ImageButton) view.findViewById(R.id.ibtn_next_track);
+        mPlayPauseImageButton = (ImageButton) view.findViewById(R.id.btn_play_pause);
+        mPreviousTrackImageButton = (ImageButton) view.findViewById(R.id.btn_previous_track);
+        mNextTrackImageButton = (ImageButton) view.findViewById(R.id.btn_next_track);
     }
 
     private void setClickListener() {
@@ -82,6 +82,11 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     public void showTrackInfo(TrackItem trackItem) {
         mTrackInfoTextView.setText(trackItem.getArtist() + " - " + trackItem.getTitle());
         mTrackDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
+    }
+
+    @Override
+    public void onUpdatePlayPauseButton(boolean isPlaying) {
+        mPlayPauseImageButton.setSelected(isPlaying);
     }
 
     @Override
