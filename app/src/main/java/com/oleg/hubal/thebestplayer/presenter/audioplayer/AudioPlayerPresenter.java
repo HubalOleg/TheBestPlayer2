@@ -33,38 +33,46 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
     private TrackItem mCurrentItem;
 
+    private boolean isPlaying = false;
+
 //    CALLBACK AND LISTENERS
 
     private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
         @Override
         public void play() {
-            mView.onUpdatePlayPauseButton(true);
+            isPlaying = true;
+            mView.onUpdatePlayPauseButton(isPlaying);
         }
 
         @Override
         public void pause() {
-            mView.onUpdatePlayPauseButton(false);
+            isPlaying = false;
+            mView.onUpdatePlayPauseButton(isPlaying);
 
         }
 
         @Override
         public void next() {
-            mView.onUpdatePlayPauseButton(true);
+            isPlaying = true;
+            mView.onUpdatePlayPauseButton(isPlaying);
         }
 
         @Override
         public void previous() {
-            mView.onUpdatePlayPauseButton(true);
+            isPlaying = true;
+            mView.onUpdatePlayPauseButton(isPlaying);
         }
 
         @Override
         public void stop() {
-            mView.onUpdatePlayPauseButton(false);
+            isPlaying = false;
+            mView.onUpdatePlayPauseButton(isPlaying);
         }
 
         @Override
         public void changeTrack() {
-            mView.onUpdatePlayPauseButton(true);
+            isPlaying = true;
+            mView.onUpdatePlayPauseButton(isPlaying);
             if (isServiceBound) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
@@ -105,7 +113,28 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     }
 
     @Override
-    public void onPlayPauseAction() {
+    public void onPlayPauseTrack() {
+        if (isServiceBound) {
+            if (isPlaying) {
+                mMusicService.pauseTrack();
+            } else {
+                mMusicService.resumeTrack();
+            }
+        }
+    }
+
+    @Override
+    public void onNextTrack() {
+        if (isServiceBound) {
+            mMusicService.nextTrack();
+        }
+    }
+
+    @Override
+    public void onPreviousTrack() {
+        if (isServiceBound) {
+            mMusicService.previousTrack();
+        }
     }
 
     @Override

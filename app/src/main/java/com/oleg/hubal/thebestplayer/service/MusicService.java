@@ -232,6 +232,10 @@ public class MusicService extends Service {
         return mTrackItems.get(mCurrentPosition);
     }
 
+    public int getCurrentPosition() {
+        return mCurrentPosition;
+    }
+
     public void playTrackByPosition(int position) {
         mCurrentPosition = position;
         playTrack();

@@ -73,7 +73,19 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         mPlayPauseImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPresenter.onPlayPauseAction();
+                mPresenter.onPlayPauseTrack();
+            }
+        });
+        mNextTrackImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPresenter.onNextTrack();
+            }
+        });
+        mPreviousTrackImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPresenter.onPreviousTrack();
             }
         });
     }

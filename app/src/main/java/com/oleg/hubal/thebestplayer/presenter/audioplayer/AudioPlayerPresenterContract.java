@@ -7,7 +7,9 @@ import com.oleg.hubal.thebestplayer.presenter.BasePresenter;
  */
 
 public interface AudioPlayerPresenterContract extends BasePresenter {
-    void onPlayPauseAction();
+    void onPlayPauseTrack();
+    void onNextTrack();
+    void onPreviousTrack();
 
     void onPause();
     void onResume();

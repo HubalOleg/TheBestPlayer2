@@ -119,7 +119,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
             mContext.registerReceiver(mPlayerReceiver, filter);
 
             if (mMusicService.isTrackListExist()) {
-                mView.setTrackItems(mMusicService.getTrackItems());
+                mTrackItems = mMusicService.getTrackItems();
+                mView.setTrackItems(mTrackItems);
+                mCurrentPosition = mMusicService.getCurrentPosition();
             }
 
             isServiceBound = true;
