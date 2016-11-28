@@ -3,6 +3,9 @@ package com.oleg.hubal.thebestplayer.utility;
 import android.app.ActivityManager;
 import android.content.Context;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by User on 22.11.2016.
  */
@@ -17,5 +20,9 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static String parseDurationToDate(long duration) {
+        return (new SimpleDateFormat("mm:ss")).format(new Date(duration));
     }
 }

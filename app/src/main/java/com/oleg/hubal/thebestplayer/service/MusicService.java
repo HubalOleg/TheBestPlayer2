@@ -36,9 +36,6 @@ public class MusicService extends Service {
     public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
     public static final String ACTION_CHANGE_TRACK = "com.oleg.hubal.thebestplayer.INTENT_CHANGE_TRACK";
 
-    public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
-    public static final String PARAM_ACTION = "action";
-
     private static final int NOTIFICATION_ID = 1121;
 
     private final IBinder mMusicBind = new MusicBinder();
@@ -62,6 +59,7 @@ public class MusicService extends Service {
         @Override
         public void onPrepared(MediaPlayer mediaPlayer) {
             mediaPlayer.start();
+            sendActionBroadcast(ACTION_CHANGE_TRACK);
             isPlaying = true;
             updateNotification();
         }
@@ -140,8 +138,8 @@ public class MusicService extends Service {
     }
 
     private void sendActionBroadcast(String action) {
-        Intent broadcastIntent = new Intent(BROADCAST_ACTION);
-        broadcastIntent.putExtra(PARAM_ACTION, action);
+        Intent broadcastIntent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+        broadcastIntent.putExtra(AudioPlayerReceiver.PARAM_ACTION, action);
         sendBroadcast(broadcastIntent);
     }
 
@@ -230,6 +228,10 @@ public class MusicService extends Service {
                 .setStyle(new NotificationCompat.MediaStyle().setShowCancelButton(true));
     }
 
+    public TrackItem getCurrentItem() {
+        return mTrackItems.get(mCurrentPosition);
+    }
+
     public void playTrackByPosition(int position) {
         mCurrentPosition = position;
         playTrack();
@@ -247,7 +249,7 @@ public class MusicService extends Service {
         }
     }
 
-    private void nextTrack() {
+    public void nextTrack() {
         unSelectPrevious();
         mCurrentPosition++;
         if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
@@ -255,7 +257,7 @@ public class MusicService extends Service {
         sendActionBroadcast(ACTION_NEXT);
     }
 
-    private void previousTrack() {
+    public void previousTrack() {
         unSelectPrevious();
         mCurrentPosition--;
         if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
@@ -267,7 +269,7 @@ public class MusicService extends Service {
         mTrackItems.get(mCurrentPosition).setSelected(false);
     }
 
-    private void pauseTrack() {
+    public void pauseTrack() {
         if (mMediaPlayer != null && isPlaying) {
             mMediaPlayer.pause();
             isPlaying = false;
@@ -275,7 +277,7 @@ public class MusicService extends Service {
         }
     }
 
-    private void resumeTrack() {
+    public void resumeTrack() {
         if (mMediaPlayer != null && !isPlaying) {
             mMediaPlayer.start();
             isPlaying = true;

@@ -12,6 +12,9 @@ import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
 
 public class AudioPlayerReceiver extends BroadcastReceiver {
 
+    public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
+    public static final String PARAM_ACTION = "action";
+
    OnPlayerActionListener mOnPlayerActionListener;
 
     public AudioPlayerReceiver(OnPlayerActionListener onPlayerActionListener) {
@@ -20,7 +23,7 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getStringExtra(MusicService.PARAM_ACTION);
+        String action = intent.getStringExtra(PARAM_ACTION);
 
         switch (action) {
             case MusicService.ACTION_PLAY:
@@ -37,6 +40,9 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
                 break;
             case MusicService.ACTION_STOP:
                 mOnPlayerActionListener.stop();
+                break;
+            case MusicService.ACTION_CHANGE_TRACK:
+                mOnPlayerActionListener.changeTrack();
                 break;
         }
     }

@@ -11,14 +11,18 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.oleg.hubal.thebestplayer.R;
+import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.presenter.audioplayer.AudioPlayerPresenter;
 import com.oleg.hubal.thebestplayer.presenter.audioplayer.AudioPlayerPresenterContract;
+import com.oleg.hubal.thebestplayer.utility.Utils;
 
 /**
  * Created by User on 23.11.2016.
  */
 
 public class AudioPlayerFragment extends Fragment implements AudioPlayerViewContract {
+
+    private static final String TAG = "AudioPlayerFragment";
 
     private AudioPlayerPresenterContract mPresenter;
 
@@ -74,7 +78,11 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         });
     }
 
-
+    @Override
+    public void showTrackInfo(TrackItem trackItem) {
+        mTrackInfoTextView.setText(trackItem.getArtist() + " - " + trackItem.getTitle());
+        mTrackDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
+    }
 
     @Override
     public void onStop() {
@@ -82,5 +90,17 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         if (mPresenter != null) {
             mPresenter.onStop();
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mPresenter.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.onResume();
     }
 }

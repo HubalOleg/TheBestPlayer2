@@ -80,6 +80,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
         public void stop() {
 
         }
+
+        @Override
+        public void changeTrack() {
+
+        }
     };
 
     private LoaderManager.LoaderCallbacks<Cursor> mCursorLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -104,13 +109,13 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
     };
 
-    private ServiceConnection mMusicConnection = new ServiceConnection() {
+    private ServiceConnection mMusicServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
 
-            IntentFilter filter = new IntentFilter(MusicService.BROADCAST_ACTION);
+            IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
             mContext.registerReceiver(mPlayerReceiver, filter);
 
             if (mMusicService.isTrackListExist()) {
@@ -164,7 +169,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private void launchService() {
         mContext.startService(mIntent);
-        mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -210,14 +215,14 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private void bindServiceIfRunning() {
         if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
-            mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
+            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     @Override
     public void onPause() {
         if (isServiceBound) {
-            mContext.unbindService(mMusicConnection);
+            mContext.unbindService(mMusicServiceConnection);
             mContext.unregisterReceiver(mPlayerReceiver);
             isServiceBound = false;
         }

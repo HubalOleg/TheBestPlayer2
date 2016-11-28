@@ -10,4 +10,5 @@ public interface OnPlayerActionListener {
     void next();
     void previous();
     void stop();
+    void changeTrack();
 }
