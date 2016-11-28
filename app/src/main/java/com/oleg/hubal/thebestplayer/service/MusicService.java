@@ -128,10 +128,6 @@ public class MusicService extends Service {
         mTrackItems = trackItems;
     }
 
-    public int getCurrentPosition() {
-        return mCurrentPosition;
-    }
-
     public List<TrackItem> getTrackItems() {
         return mTrackItems;
     }
