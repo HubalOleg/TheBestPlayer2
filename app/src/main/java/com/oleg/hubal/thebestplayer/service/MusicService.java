@@ -29,8 +29,10 @@ public class MusicService extends Service {
 
     private MediaPlayer mMediaPlayer;
     private int mCurrentPosition = 0;
+    private boolean isPlaying = false;
 
     private List<TrackItem> mTrackItems;
+
 
 //    Listeners
 
@@ -38,6 +40,7 @@ public class MusicService extends Service {
         @Override
         public void onPrepared(MediaPlayer mediaPlayer) {
             mediaPlayer.start();
+            isPlaying = true;
             updateNotification();
         }
     };
@@ -122,6 +125,18 @@ public class MusicService extends Service {
 
     public void setTrackItems(List<TrackItem> trackItems) {
         mTrackItems = trackItems;
+    }
+
+    public int getCurrentPosition() {
+        return mCurrentPosition;
+    }
+
+    public List<TrackItem> getTrackItems() {
+        return mTrackItems;
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
     }
 
     public class MusicBinder extends Binder {

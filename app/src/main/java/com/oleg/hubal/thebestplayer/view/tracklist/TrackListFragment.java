@@ -34,7 +34,6 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     private TrackListAdapter.OnTrackItemClickListener mOnTrackItemClickListener = new TrackListAdapter.OnTrackItemClickListener() {
         @Override
         public void onTrackClicked(int position) {
-            mTrackListAdapter.setTrackSelected(position);
             mPresenter.onTrackSelected(position);
         }
 
@@ -57,10 +56,10 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         if (mPresenter != null) {
-            mPresenter.onStart();
+            mPresenter.onResume();
         }
     }
 
@@ -83,12 +82,18 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         trackRecyclerView.setAdapter(mTrackListAdapter);
 
         launchTrackListLoader();
+
         return view;
     }
 
     @Override
     public void setSelectedItem(int position) {
         mTrackListAdapter.setTrackSelected(position);
+    }
+
+    @Override
+    public void setTrackItems(List<TrackItem> trackItems) {
+        mTrackListAdapter.setData(trackItems);
     }
 
     private void launchTrackListLoader() {
@@ -105,6 +110,14 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         super.onStop();
         if (mPresenter != null) {
             mPresenter.onStop();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPresenter != null) {
+            mPresenter.onPause();
         }
     }
 }

@@ -13,7 +13,6 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.MusicService;
@@ -32,6 +31,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private static final String TAG = "TrackListPresenter";
 
     private final Context mContext;
+    private Intent mIntent;
     private TrackListViewContract mView;
     private List<TrackItem> mTrackItems;
 
@@ -69,12 +69,16 @@ public class TrackListPresenter implements TrackListPresenterContract {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
+
+            isServiceBound = true;
+
             if (mTrackItems != null) {
                 mMusicService.setTrackItems(mTrackItems);
             }
-            isServiceBound = true;
-            mMusicService.playTrackByPosition(mCurrentPosition);
-            Log.d(TAG, "onServiceConnected: ");
+
+            if (!mMusicService.isPlaying()) {
+                mMusicService.playTrackByPosition(mCurrentPosition);
+            }
         }
 
         @Override
@@ -88,27 +92,30 @@ public class TrackListPresenter implements TrackListPresenterContract {
     public TrackListPresenter(Context context, TrackListViewContract view) {
         mContext = context;
         mView = view;
+        mIntent = new Intent(mContext, MusicService.class);
+        bindServiceIfRunning();
     }
 
     @Override
     public void onTrackSelected(int position) {
         mCurrentPosition = position;
+        mView.setSelectedItem(mCurrentPosition);
 
         if (Utils.isServiceRunning(MusicService.class.getName(), mContext)) {
-            if (isServiceBound) {
-                mMusicService.playTrackByPosition(mCurrentPosition);
-            }
+            changeTrack();
         } else {
-            Intent intent = new Intent(mContext, MusicService.class);
-            mContext.startService(intent);
-            mContext.bindService(intent, mMusicConnection, Context.BIND_AUTO_CREATE);
+            launchService();
         }
     }
 
+    private void changeTrack() {
+        mMusicService.playTrackByPosition(mCurrentPosition);
+        mView.setSelectedItem(mCurrentPosition);
+    }
 
-    @Override
-    public void onStart() {
-
+    private void launchService() {
+        mContext.startService(mIntent);
+        mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -119,6 +126,17 @@ public class TrackListPresenter implements TrackListPresenterContract {
     @Override
     public TrackItem getTrackItemByPosition(int position) {
         return mTrackItems.get(position);
+    }
+
+    @Override
+    public void onRequestItemsFromService() {
+        mView.setTrackItems(mTrackItems);
+        mView.setSelectedItem(mMusicService.getCurrentPosition());
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return mCurrentPosition;
     }
 
     private CursorLoader createCursorLoader() {
@@ -150,8 +168,26 @@ public class TrackListPresenter implements TrackListPresenterContract {
         return trackItems;
     }
 
+    private void bindServiceIfRunning() {
+        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
+            mContext.bindService(mIntent, mMusicConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        if (isServiceBound) {
+            mContext.unbindService(mMusicConnection);
+            isServiceBound = false;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        bindServiceIfRunning();
+    }
+
     @Override
     public void onStop() {
-
     }
 }

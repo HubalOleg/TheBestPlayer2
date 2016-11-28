@@ -2,7 +2,6 @@ package com.oleg.hubal.thebestplayer.presenter.audioplayer;
 
 import android.content.Context;
 
-import com.oleg.hubal.thebestplayer.utility.PlayerConstants;
 import com.oleg.hubal.thebestplayer.view.audioplayer.AudioPlayerViewContract;
 
 /**
@@ -21,7 +20,6 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
     @Override
     public void onPlayPauseAction() {
-        PlayerConstants.PLAY_PAUSE_HANDLER.sendEmptyMessage(0);
     }
 
     @Override
