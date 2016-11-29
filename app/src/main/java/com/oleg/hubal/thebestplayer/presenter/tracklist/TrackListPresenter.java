@@ -68,6 +68,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
             }
 
             mView.setSelectedItem(mCurrentPosition);
+            mView.scrollListToPosition(mCurrentPosition);
         }
 
         @Override
@@ -77,6 +78,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
                 mCurrentPosition = mTrackItems.size() - 1;
 
             mView.setSelectedItem(mCurrentPosition);
+            mView.scrollListToPosition(mCurrentPosition);
         }
 
         @Override
@@ -96,13 +98,14 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void queue(int position) {
             mCurrentPosition = position;
-            mView.setItemQueue(mCurrentPosition, -1);
+            mView.setItemQueue(mCurrentPosition);
 
             for (int i : mQueueList) {
-                mView.setItemQueue(i, mTrackItems.get(i).getQueuePosition());
+                mView.setItemQueue(i);
             }
 
             mView.setSelectedItem(mCurrentPosition);
+            mView.scrollListToPosition(mCurrentPosition);
         }
     };
 
@@ -201,7 +204,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private void addToQueue(int itemPosition) {
         mQueueList.add(mQueueList.size(), itemPosition);
         mTrackItems.get(itemPosition).setQueuePosition(mQueueList.size());
-        mView.setItemQueue(itemPosition, mQueueList.size());
+        mView.setItemQueue(itemPosition);
     }
 
     private void removeFromQueue(int itemPosition) {
@@ -210,11 +213,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
             TrackItem itemFromQueue = mTrackItems.get(mQueueList.get(i));
             int newPosition = itemFromQueue.getQueuePosition() - 1;
             itemFromQueue.setQueuePosition(newPosition);
-            mView.setItemQueue(mQueueList.get(i), newPosition);
+            mView.setItemQueue(mQueueList.get(i));
         }
         mQueueList.remove(queuePosition - 1);
         mTrackItems.get(itemPosition).setQueuePosition(-1);
-        mView.setItemQueue(itemPosition, -1);
+        mView.setItemQueue(itemPosition);
     }
 
     private void changeTrack() {

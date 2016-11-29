@@ -3,7 +3,6 @@ package com.oleg.hubal.thebestplayer.view.audioplayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     private ImageButton mPlayPauseImageButton;
     private ImageButton mPreviousTrackImageButton;
     private ImageButton mNextTrackImageButton;
+    private ImageButton mLoopTrackImageButton;
 
     public static AudioPlayerFragment newInstance() {
         return new AudioPlayerFragment();
@@ -55,7 +55,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         View view = inflater.inflate(R.layout.fragment_audioplayer, container, false);
 
         initViews(view);
-        setClickListener();
+        setListeners();
 
         return view;
     }
@@ -68,9 +68,10 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         mPlayPauseImageButton = (ImageButton) view.findViewById(R.id.btn_play_pause);
         mPreviousTrackImageButton = (ImageButton) view.findViewById(R.id.btn_previous_track);
         mNextTrackImageButton = (ImageButton) view.findViewById(R.id.btn_next_track);
+        mLoopTrackImageButton = (ImageButton) view.findViewById(R.id.btn_loop_track);
     }
 
-    private void setClickListener() {
+    private void setListeners() {
         mPlayPauseImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,6 +88,12 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
             @Override
             public void onClick(View view) {
                 mPresenter.onPreviousTrack();
+            }
+        });
+        mLoopTrackImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPresenter.onLoopTrack();
             }
         });
         mTrackPositionSeekBack.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -132,6 +139,11 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     @Override
     public void changeTrackPositionTextView(String currentPosition) {
         mTrackPositionTextView.setText(currentPosition);
+    }
+
+    @Override
+    public void showLooping(boolean isLooping) {
+        mLoopTrackImageButton.setSelected(isLooping);
     }
 
     @Override

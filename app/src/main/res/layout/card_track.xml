@@ -40,9 +40,10 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_playlst_queue"
+            android:id="@+id/btn_playlist_queue"
             android:layout_width="60dp"
-            android:layout_height="60dp"/>
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"/>
 
     </LinearLayout>
 

@@ -11,4 +11,5 @@ public interface AudioPlayerViewContract {
     void onUpdatePlayPauseButton(boolean isPlaying);
     void changeSeekBarPosition(int position);
     void changeTrackPositionTextView(String currentPosition);
+    void showLooping(boolean isLooping);
 }

@@ -55,6 +55,8 @@ public class MusicService extends Service {
     private int mCurrentPosition = -1;
     private boolean isPlaying = false;
 
+    private boolean isLooping = false;
+
     private List<TrackItem> mTrackItems;
     private List<Integer> mQueueList = new ArrayList();
 
@@ -85,7 +87,11 @@ public class MusicService extends Service {
     private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
-            nextTrack();
+            if (isLooping) {
+                playTrack();
+            } else {
+                nextTrack();
+            }
         }
     };
 
@@ -355,6 +361,14 @@ public class MusicService extends Service {
 
     public void seekTrackTo(int position) {
         mMediaPlayer.seekTo(position);
+    }
+
+    public void setLooping(boolean isLooping) {
+        this.isLooping = isLooping;
+    }
+
+    public boolean isLooping() {
+        return isLooping;
     }
 
     private void stopMedia() {

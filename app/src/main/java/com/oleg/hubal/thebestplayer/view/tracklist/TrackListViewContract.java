@@ -14,5 +14,6 @@ public interface TrackListViewContract {
     void setSelectedItem(int position);
     void setTrackItems(List<TrackItem> trackItems);
     void launchTrackListLoader();
-    void setItemQueue(int itemPosition, int queuePosition);
+    void setItemQueue(int itemPosition);
+    void scrollListToPosition(int position);
 }

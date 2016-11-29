@@ -74,11 +74,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         mActivePosition = position;
     }
 
-    public void setQueueSelected(int itemPosition, int queuePosition) {
-        if (mTrackItems.get(itemPosition).getQueuePosition() == -1) {
-            mViewHolders[itemPosition].unSetQueue();
-        } else {
-            mViewHolders[itemPosition].setQueue(queuePosition);
+    public void setQueueSelected(int itemPosition) {
+        if (mViewHolders[itemPosition] != null) {
+            mViewHolders[itemPosition].setQueue();
         }
     }
 
@@ -89,7 +87,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         private TextView mTitleTextView;
         private Button mPlaylistQueueButton;
         private ImageView mAlbumArtImageView;
-        private boolean isQueue = false;
+        private TrackItem mTrackItem;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -97,10 +95,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             mAlbumArtImageView = (ImageView) itemView.findViewById(R.id.iv_album_art);
             mArtistTextView = (TextView) itemView.findViewById(R.id.tv_artist);
             mTitleTextView = (TextView) itemView.findViewById(R.id.tv_title);
-            mPlaylistQueueButton = (Button) itemView.findViewById(R.id.btn_playlst_queue);
+            mPlaylistQueueButton = (Button) itemView.findViewById(R.id.btn_playlist_queue);
         }
 
         public void onBind(final int position, TrackItem trackItem) {
+            mTrackItem = trackItem;
             Picasso.with(mContext).load(trackItem.getAlbumImage()).into(mAlbumArtImageView);
             mArtistTextView.setText(trackItem.getArtist());
             mTitleTextView.setText(trackItem.getTitle());
@@ -110,10 +109,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             int queuePosition = trackItem.getQueuePosition();
             if (queuePosition != -1) {
                 mPlaylistQueueButton.setText(String.valueOf(queuePosition));
-                isQueue = true;
             } else {
                 mPlaylistQueueButton.setText("");
-                isQueue = false;
             }
 
             if (trackItem.isSelected())
@@ -138,18 +135,13 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             mItemView.setSelected(isSelected);
         }
 
-        public void setQueue(int position) {
-            mPlaylistQueueButton.setText(String.valueOf(position));
-            isQueue = true;
-        }
-
-        public void unSetQueue() {
-            mPlaylistQueueButton.setText("");
-            isQueue = false;
-        }
-
-        public boolean isQueue() {
-            return isQueue;
+        public void setQueue() {
+            if (mTrackItem.getQueuePosition() != -1) {
+                int position = mTrackItem.getQueuePosition();
+                mPlaylistQueueButton.setText(String.valueOf(position));
+            } else {
+                mPlaylistQueueButton.setText("");
+            }
         }
     }
 

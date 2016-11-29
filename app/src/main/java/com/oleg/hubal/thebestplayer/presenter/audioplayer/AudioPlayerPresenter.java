@@ -38,6 +38,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     private long mCurrentTrackPosition;
 
     private boolean isPlaying = false;
+    private boolean isLooping = false;
 
 //    CALLBACK AND LISTENERS
 
@@ -116,6 +117,8 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             if (mMusicService.isTrackListExist()) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
+                isLooping = mMusicService.isLooping();
+                mView.showLooping(isLooping);
             }
         }
 
@@ -190,6 +193,15 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
                 mMusicService.seekTrackTo(seekPosition);
                 mView.changeTrackPositionTextView(Utils.parseDurationToDate(seekPosition));
             }
+        }
+    }
+
+    @Override
+    public void onLoopTrack() {
+        if (isServiceBound) {
+            isLooping = !isLooping;
+            mMusicService.setLooping(isLooping);
+            mView.showLooping(isLooping);
         }
     }
 

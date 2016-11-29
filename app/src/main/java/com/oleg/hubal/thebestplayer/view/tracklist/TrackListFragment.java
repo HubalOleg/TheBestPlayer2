@@ -29,6 +29,10 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
 
     private TrackListAdapter mTrackListAdapter;
 
+    private LinearLayoutManager mLayoutManager;
+
+    private int mDisplayHeight;
+
 //    LISTENERS
 
     private TrackListAdapter.OnTrackItemClickListener mOnTrackItemClickListener = new TrackListAdapter.OnTrackItemClickListener() {
@@ -75,8 +79,8 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         RecyclerView trackRecyclerView = (RecyclerView) view.findViewById(R.id.rv_track_list_recycler);
         trackRecyclerView.setHasFixedSize(true);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        trackRecyclerView.setLayoutManager(layoutManager);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        trackRecyclerView.setLayoutManager(mLayoutManager);
 
         mTrackListAdapter = new TrackListAdapter(getContext(), mOnTrackItemClickListener);
         trackRecyclerView.setAdapter(mTrackListAdapter);
@@ -92,8 +96,8 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     }
 
     @Override
-    public void setItemQueue(int itemPosition,int queuePosition) {
-        mTrackListAdapter.setQueueSelected(itemPosition, queuePosition);
+    public void setItemQueue(int itemPosition) {
+        mTrackListAdapter.setQueueSelected(itemPosition);
     }
 
     @Override
@@ -109,6 +113,12 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     @Override
     public void showTrackList(List<TrackItem> trackList) {
         mTrackListAdapter.setData(trackList);
+    }
+
+    @Override
+    public void scrollListToPosition(int position) {
+        mLayoutManager.scrollToPositionWithOffset(position, mLayoutManager.getHeight() / 2);
+        mTrackListAdapter.notifyDataSetChanged();
     }
 
     @Override
