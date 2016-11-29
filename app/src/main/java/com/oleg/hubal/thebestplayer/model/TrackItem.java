@@ -11,6 +11,7 @@ public class TrackItem extends SelectableItem {
     private String artist;
     private String title;
     private long duration;
+    private int queuePosition;
 
     public TrackItem(String path, String albumImage, String artist, String title, long duration) {
         this.path = path;
@@ -18,6 +19,7 @@ public class TrackItem extends SelectableItem {
         this.artist = artist;
         this.title = title;
         this.duration = duration;
+        queuePosition = -1;
     }
 
     public String getPath() {
@@ -58,5 +60,13 @@ public class TrackItem extends SelectableItem {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public int getQueuePosition() {
+        return queuePosition;
+    }
+
+    public void setQueuePosition(int queuePosition) {
+        this.queuePosition = queuePosition;
     }
 }

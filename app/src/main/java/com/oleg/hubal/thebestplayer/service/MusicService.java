@@ -20,6 +20,7 @@ import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.view.MainActivity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +54,7 @@ public class MusicService extends Service {
     private boolean isPlaying = false;
 
     private List<TrackItem> mTrackItems;
+    private List<Integer> mQueueList = new ArrayList();
 
     Handler mSeekHandler = new Handler();
 
@@ -344,6 +346,18 @@ public class MusicService extends Service {
 
     public List<TrackItem> getTrackItems() {
         return mTrackItems;
+    }
+
+    public void setQueueList(List<Integer> queueList) {
+        mQueueList = queueList;
+    }
+
+    public List<Integer> getQueueList() {
+        return mQueueList;
+    }
+
+    public boolean isQueueListExist() {
+        return (mQueueList.size() != 0);
     }
 
     public boolean isPlaying() {

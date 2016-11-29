@@ -38,6 +38,8 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private TrackListViewContract mView;
     private List<TrackItem> mTrackItems;
 
+    private List<Integer> mQueueList = new ArrayList();
+
     private AudioPlayerReceiver mPlayerReceiver;
 
     private MusicService mMusicService;
@@ -122,13 +124,15 @@ public class TrackListPresenter implements TrackListPresenterContract {
                 mTrackItems = mMusicService.getTrackItems();
                 mView.setTrackItems(mTrackItems);
                 mCurrentPosition = mMusicService.getCurrentPosition();
+            } else if (mTrackItems != null) {
+                mMusicService.setTrackItems(mTrackItems);
+            }
+
+            if (mMusicService.isQueueListExist()) {
+                mQueueList = mMusicService.getQueueList();
             }
 
             isServiceBound = true;
-
-            if (mTrackItems != null) {
-                mMusicService.setTrackItems(mTrackItems);
-            }
 
             if (!mMusicService.isPlaying()) {
                 mMusicService.playTrackByPosition(mCurrentPosition);
@@ -165,7 +169,30 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     @Override
     public void onQueueSelected(int itemPosition) {
-        mView.setItemQueue(itemPosition, 0);
+        if (mTrackItems.get(itemPosition).getQueuePosition() == -1) {
+            addToQueue(itemPosition);
+        } else {
+            removeFromQueue(itemPosition);
+        }
+    }
+
+    private void addToQueue(int itemPosition) {
+        mQueueList.add(mQueueList.size(), itemPosition);
+        mTrackItems.get(itemPosition).setQueuePosition(mQueueList.size());
+        mView.setItemQueue(itemPosition, mQueueList.size());
+    }
+
+    private void removeFromQueue(int itemPosition) {
+        int queuePosition = mTrackItems.get(itemPosition).getQueuePosition();
+        for (int i = queuePosition; i < mQueueList.size(); i++) {
+            TrackItem itemFromQueue = mTrackItems.get(mQueueList.get(i));
+            int newPosition = itemFromQueue.getQueuePosition() - 1;
+            itemFromQueue.setQueuePosition(newPosition);
+            mView.setItemQueue(mQueueList.get(i), newPosition);
+        }
+        mQueueList.remove(queuePosition - 1);
+        mTrackItems.get(itemPosition).setQueuePosition(-1);
+        mView.setItemQueue(itemPosition, mQueueList.size());
     }
 
     private void changeTrack() {
