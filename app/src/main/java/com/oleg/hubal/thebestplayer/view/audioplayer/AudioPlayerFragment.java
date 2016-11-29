@@ -126,7 +126,6 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
 
     @Override
     public void changeSeekBarPosition(int position) {
-        Log.d(TAG, "changeSeekBarPosition: " + position);
         mTrackPositionSeekBack.setProgress(position);
     }
 

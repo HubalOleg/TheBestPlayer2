@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.view.MainActivity;
@@ -283,7 +284,9 @@ public class MusicService extends Service {
 
     public void nextTrack() {
         unSelectPrevious();
+
         mCurrentPosition++;
+
         if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
         playTrack();
         sendActionBroadcast(ACTION_NEXT);
@@ -357,6 +360,7 @@ public class MusicService extends Service {
     }
 
     public boolean isQueueListExist() {
+        Log.d(TAG, "isQueueListExist: " + mQueueList.size());
         return (mQueueList.size() != 0);
     }
 

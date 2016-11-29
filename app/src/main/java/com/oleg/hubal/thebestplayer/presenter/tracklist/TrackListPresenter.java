@@ -63,8 +63,10 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void next() {
             mCurrentPosition++;
-            if (mCurrentPosition >= mTrackItems.size())
+            if (mCurrentPosition >= mTrackItems.size()) {
                 mCurrentPosition = 0;
+            }
+
             mView.setSelectedItem(mCurrentPosition);
         }
 
@@ -119,6 +121,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
+            isServiceBound = true;
 
             if (mMusicService.isTrackListExist()) {
                 mTrackItems = mMusicService.getTrackItems();
@@ -130,9 +133,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
             if (mMusicService.isQueueListExist()) {
                 mQueueList = mMusicService.getQueueList();
+            } else {
+                setQueueListToService();
             }
-
-            isServiceBound = true;
 
             if (!mMusicService.isPlaying()) {
                 mMusicService.playTrackByPosition(mCurrentPosition);
@@ -173,6 +176,13 @@ public class TrackListPresenter implements TrackListPresenterContract {
             addToQueue(itemPosition);
         } else {
             removeFromQueue(itemPosition);
+        }
+        setQueueListToService();
+    }
+
+    private void setQueueListToService() {
+        if (isServiceBound) {
+            mMusicService.setQueueList(mQueueList);
         }
     }
 
@@ -255,9 +265,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     @Override
     public void onPause() {
+        mContext.unregisterReceiver(mPlayerReceiver);
         if (isServiceBound) {
             mContext.unbindService(mMusicServiceConnection);
-            mContext.unregisterReceiver(mPlayerReceiver);
             isServiceBound = false;
         }
     }

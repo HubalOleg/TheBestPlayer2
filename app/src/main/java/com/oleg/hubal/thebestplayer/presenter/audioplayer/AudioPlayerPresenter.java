@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
@@ -89,7 +88,6 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
         @Override
         public void changeCurrentPosition(long currentPosition) {
-            Log.d(TAG, "changeCurrentPosition: " + currentPosition);
             int position;
             mCurrentTrackDuration = mCurrentItem.getDuration();
             mCurrentTrackPosition = currentPosition;
@@ -166,9 +164,9 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     public void onPause() {
         if (isServiceBound) {
             mContext.unbindService(mMusicServiceConnection);
-            mContext.unregisterReceiver(mPlayerReceiver);
             isServiceBound = false;
         }
+        mContext.unregisterReceiver(mPlayerReceiver);
     }
 
     @Override
