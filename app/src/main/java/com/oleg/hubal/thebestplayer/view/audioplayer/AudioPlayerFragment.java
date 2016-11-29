@@ -3,6 +3,7 @@ package com.oleg.hubal.thebestplayer.view.audioplayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,17 +89,50 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
                 mPresenter.onPreviousTrack();
             }
         });
+        mTrackPositionSeekBack.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mPresenter.onSeekTrackTo(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     @Override
     public void showTrackInfo(TrackItem trackItem) {
+        updateUI();
         mTrackInfoTextView.setText(trackItem.getArtist() + " - " + trackItem.getTitle());
         mTrackDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
+    }
+
+    private void updateUI() {
+        mTrackPositionSeekBack.setProgress(0);
+        mTrackPositionTextView.setText("00:00");
     }
 
     @Override
     public void onUpdatePlayPauseButton(boolean isPlaying) {
         mPlayPauseImageButton.setSelected(isPlaying);
+    }
+
+    @Override
+    public void changeSeekBarPosition(int position) {
+        Log.d(TAG, "changeSeekBarPosition: " + position);
+        mTrackPositionSeekBack.setProgress(position);
+    }
+
+    @Override
+    public void changeTrackPositionTextView(String currentPosition) {
+        mTrackPositionTextView.setText(currentPosition);
     }
 
     @Override

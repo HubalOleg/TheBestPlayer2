@@ -14,7 +14,6 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
@@ -56,7 +55,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
         @Override
         public void pause() {
-            Log.d(TAG, "pause: " + "mageeeeg");
+
         }
 
         @Override
@@ -84,6 +83,10 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void changeTrack() {
 
+        }
+
+        @Override
+        public void changeCurrentPosition(long currentPosition ) {
         }
     };
 
@@ -114,9 +117,6 @@ public class TrackListPresenter implements TrackListPresenterContract {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
             mMusicService = binder.getService();
-
-            IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
-            mContext.registerReceiver(mPlayerReceiver, filter);
 
             if (mMusicService.isTrackListExist()) {
                 mTrackItems = mMusicService.getTrackItems();
@@ -233,6 +233,8 @@ public class TrackListPresenter implements TrackListPresenterContract {
     @Override
     public void onResume() {
         bindServiceIfRunning();
+        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
+        mContext.registerReceiver(mPlayerReceiver, filter);
     }
 
     @Override

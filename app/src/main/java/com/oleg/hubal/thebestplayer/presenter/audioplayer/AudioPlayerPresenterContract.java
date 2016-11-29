@@ -13,4 +13,5 @@ public interface AudioPlayerPresenterContract extends BasePresenter {
 
     void onPause();
     void onResume();
+    void onSeekTrackTo(int position);
 }

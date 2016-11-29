@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:max="100"
         android:layout_toRightOf="@id/tv_track_current_position"
         android:layout_toLeftOf="@id/tv_track_duration"
         android:layout_below="@id/tv_track_info"/>

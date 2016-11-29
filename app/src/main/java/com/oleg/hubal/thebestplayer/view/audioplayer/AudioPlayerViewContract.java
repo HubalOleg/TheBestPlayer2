@@ -9,4 +9,6 @@ import com.oleg.hubal.thebestplayer.model.TrackItem;
 public interface AudioPlayerViewContract {
     void showTrackInfo(TrackItem trackItem);
     void onUpdatePlayPauseButton(boolean isPlaying);
+    void changeSeekBarPosition(int position);
+    void changeTrackPositionTextView(String currentPosition);
 }

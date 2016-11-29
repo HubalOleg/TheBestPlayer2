@@ -11,6 +11,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
@@ -35,6 +36,7 @@ public class MusicService extends Service {
     public static final String ACTION_PREVIOUS = "com.oleg.hubal.thebestplayer.INTENT_PLAY_PAUSE";
     public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
     public static final String ACTION_CHANGE_TRACK = "com.oleg.hubal.thebestplayer.INTENT_CHANGE_TRACK";
+    public static final String ACTION_CHANGE_CURRENT_POSITION = "com.oleg.hubal.thebestplayer.INTENT_CURRENT_POSITION";
 
     private static final int NOTIFICATION_ID = 1121;
 
@@ -52,16 +54,20 @@ public class MusicService extends Service {
 
     private List<TrackItem> mTrackItems;
 
+    Handler mSeekHandler = new Handler();
+
 
 //    Listeners
 
     private MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
         @Override
         public void onPrepared(MediaPlayer mediaPlayer) {
+            stopProgressUpdate();
             mediaPlayer.start();
             sendActionBroadcast(ACTION_CHANGE_TRACK);
             isPlaying = true;
             updateNotification();
+            startProgressUpdate();
         }
     };
 
@@ -76,6 +82,17 @@ public class MusicService extends Service {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
             nextTrack();
+        }
+    };
+
+    private Runnable mUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+            intent.putExtra(AudioPlayerReceiver.PARAM_ACTION, ACTION_CHANGE_CURRENT_POSITION);
+            intent.putExtra(AudioPlayerReceiver.PARAM_CURRENT_POSITION, mMediaPlayer.getCurrentPosition());
+            sendBroadcast(intent);
+            mSeekHandler.postDelayed(mUpdateRunnable, 1000);
         }
     };
 
@@ -184,6 +201,7 @@ public class MusicService extends Service {
             public void onStop() {
                 super.onStop();
                 stopMedia();
+                stopProgressUpdate();
 
                 Intent intent = new Intent(getApplicationContext(), MusicService.class);
                 stopService(intent);
@@ -193,6 +211,14 @@ public class MusicService extends Service {
                 startActivity(in);
             }
         });
+    }
+
+    private void startProgressUpdate() {
+        mSeekHandler.post(mUpdateRunnable);
+    }
+
+    private void stopProgressUpdate() {
+        mSeekHandler.removeCallbacks(mUpdateRunnable);
     }
 
     private NotificationCompat.Action generateAction(int icon, String title, String intentAction) {
@@ -275,6 +301,7 @@ public class MusicService extends Service {
 
     public void pauseTrack() {
         if (mMediaPlayer != null && isPlaying) {
+            stopProgressUpdate();
             mMediaPlayer.pause();
             isPlaying = false;
             sendActionBroadcast(ACTION_PAUSE);
@@ -283,10 +310,15 @@ public class MusicService extends Service {
 
     public void resumeTrack() {
         if (mMediaPlayer != null && !isPlaying) {
+            startProgressUpdate();
             mMediaPlayer.start();
             isPlaying = true;
             sendActionBroadcast(ACTION_PLAY);
         }
+    }
+
+    public void seekTrackTo(int position) {
+        mMediaPlayer.seekTo(position);
     }
 
     private void stopMedia() {

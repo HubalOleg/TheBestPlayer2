@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
@@ -31,13 +32,18 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
     private AudioPlayerReceiver mPlayerReceiver;
 
+
+
     private TrackItem mCurrentItem;
+    private long mCurrentTrackDuration = 0;
+    private long mCurrentTrackPosition;
 
     private boolean isPlaying = false;
 
 //    CALLBACK AND LISTENERS
 
     private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
+
         @Override
         public void play() {
             isPlaying = true;
@@ -79,6 +85,20 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             } else {
                 bindServiceIfRunning();
             }
+        }
+
+        @Override
+        public void changeCurrentPosition(long currentPosition) {
+            Log.d(TAG, "changeCurrentPosition: " + currentPosition);
+            int position;
+            mCurrentTrackDuration = mCurrentItem.getDuration();
+            mCurrentTrackPosition = currentPosition;
+
+            position = (int) (currentPosition * 100 / mCurrentTrackDuration);
+
+            String stringPosition = Utils.parseDurationToDate(currentPosition);
+            mView.changeSeekBarPosition(position);
+            mView.changeTrackPositionTextView(stringPosition);
         }
     };
 
@@ -156,6 +176,18 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         bindServiceIfRunning();
         IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
         mContext.registerReceiver(mPlayerReceiver, filter);
+    }
+
+    @Override
+    public void onSeekTrackTo(int position) {
+        if (isServiceBound) {
+            mCurrentTrackDuration = mCurrentItem.getDuration();
+            int seekPosition = (int) (mCurrentTrackDuration / 100 * position);
+            if (Math.abs(seekPosition - mCurrentTrackPosition) >= 5000) {
+                mMusicService.seekTrackTo(seekPosition);
+                mView.changeTrackPositionTextView(Utils.parseDurationToDate(seekPosition));
+            }
+        }
     }
 
     private void bindServiceIfRunning() {
