@@ -98,6 +98,11 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             mView.changeSeekBarPosition(position);
             mView.changeTrackPositionTextView(stringPosition);
         }
+
+        @Override
+        public void queue(int position) {
+
+        }
     };
 
     private ServiceConnection mMusicServiceConnection = new ServiceConnection() {

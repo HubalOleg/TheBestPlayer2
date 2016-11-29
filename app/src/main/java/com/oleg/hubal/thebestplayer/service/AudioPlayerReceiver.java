@@ -18,6 +18,7 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
     public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
     public static final String PARAM_ACTION = "action";
     public static final String PARAM_CURRENT_POSITION = "current_position";
+    public static final String PARAM_QUEUE_POSITION = "queue_position";
 
    OnPlayerActionListener mOnPlayerActionListener;
 
@@ -51,6 +52,9 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
                 break;
             case MusicService.ACTION_CHANGE_CURRENT_POSITION:
                 mOnPlayerActionListener.changeCurrentPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
+                break;
+            case MusicService.ACTION_QUEUE:
+                mOnPlayerActionListener.queue(intent.getIntExtra(PARAM_QUEUE_POSITION, 0));
                 break;
         }
     }

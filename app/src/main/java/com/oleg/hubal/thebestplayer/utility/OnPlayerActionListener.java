@@ -12,4 +12,5 @@ public interface OnPlayerActionListener {
     void previous();
     void stop();
     void changeTrack();
+    void queue(int position);
 }

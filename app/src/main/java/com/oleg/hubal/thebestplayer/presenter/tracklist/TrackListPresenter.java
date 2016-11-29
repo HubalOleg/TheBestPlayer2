@@ -92,6 +92,18 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void changeCurrentPosition(long currentPosition ) {
         }
+
+        @Override
+        public void queue(int position) {
+            mCurrentPosition = position;
+            mView.setItemQueue(mCurrentPosition, -1);
+
+            for (int i : mQueueList) {
+                mView.setItemQueue(i, mTrackItems.get(i).getQueuePosition());
+            }
+
+            mView.setSelectedItem(mCurrentPosition);
+        }
     };
 
     private LoaderManager.LoaderCallbacks<Cursor> mCursorLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -202,7 +214,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
         mQueueList.remove(queuePosition - 1);
         mTrackItems.get(itemPosition).setQueuePosition(-1);
-        mView.setItemQueue(itemPosition, mQueueList.size());
+        mView.setItemQueue(itemPosition, -1);
     }
 
     private void changeTrack() {

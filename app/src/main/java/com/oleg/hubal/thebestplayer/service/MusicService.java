@@ -39,6 +39,7 @@ public class MusicService extends Service {
     public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
     public static final String ACTION_CHANGE_TRACK = "com.oleg.hubal.thebestplayer.INTENT_CHANGE_TRACK";
     public static final String ACTION_CHANGE_CURRENT_POSITION = "com.oleg.hubal.thebestplayer.INTENT_CURRENT_POSITION";
+    public static final String ACTION_QUEUE = "com.oleg.hubal.thebestplayer.INTENT_PLAY_FROM_QUEUE";
 
     private static final int NOTIFICATION_ID = 1121;
 
@@ -95,7 +96,7 @@ public class MusicService extends Service {
             intent.putExtra(AudioPlayerReceiver.PARAM_ACTION, ACTION_CHANGE_CURRENT_POSITION);
             intent.putExtra(AudioPlayerReceiver.PARAM_CURRENT_POSITION, mMediaPlayer.getCurrentPosition());
             sendBroadcast(intent);
-            mSeekHandler.postDelayed(mUpdateRunnable, 1000);
+            mSeekHandler.postDelayed(mUpdateRunnable, 500);
         }
     };
 
@@ -266,8 +267,12 @@ public class MusicService extends Service {
     }
 
     public void playTrackByPosition(int position) {
-        mCurrentPosition = position;
-        playTrack();
+        if (mQueueList.size() != 0 && mQueueList.get(0) == position) {
+            playTrackFromQueue();
+        } else {
+            mCurrentPosition = position;
+            playTrack();
+        }
     }
 
     private void playTrack() {
@@ -285,11 +290,37 @@ public class MusicService extends Service {
     public void nextTrack() {
         unSelectPrevious();
 
-        mCurrentPosition++;
+        if (mQueueList.size() == 0) {
+            mCurrentPosition++;
+            sendActionBroadcast(ACTION_NEXT);
+            if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
+            playTrack();
+        } else {
+            playTrackFromQueue();
+        }
+    }
 
-        if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
+    private void playTrackFromQueue() {
+        mCurrentPosition = mQueueList.get(0);
+        mTrackItems.get(mCurrentPosition).setQueuePosition(-1);
+        mQueueList.remove(0);
+
+        for (int i : mQueueList) {
+            TrackItem queueItem = mTrackItems.get(i);
+            int oldPosition = queueItem.getQueuePosition();
+            queueItem.setQueuePosition(oldPosition - 1);
+        }
+
+        sendQueueBroadcast();
+
         playTrack();
-        sendActionBroadcast(ACTION_NEXT);
+    }
+
+    private void sendQueueBroadcast() {
+        Intent queueIntent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+        queueIntent.putExtra(AudioPlayerReceiver.PARAM_ACTION, ACTION_QUEUE);
+        queueIntent.putExtra(AudioPlayerReceiver.PARAM_QUEUE_POSITION, mCurrentPosition);
+        sendBroadcast(queueIntent);
     }
 
     public void previousTrack() {
