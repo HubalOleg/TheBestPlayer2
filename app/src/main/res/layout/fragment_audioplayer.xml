@@ -1,67 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/tv_track_info"
+    <ImageView
+        android:id="@+id/iv_big_album_art"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:layout_alignBottom="@+id/linearLayout"/>
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="Artist - Title"/>
-    <TextView
-        android:id="@+id/tv_track_current_position"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/tv_track_info"
-        android:text="00:00"/>
-    <TextView
-        android:id="@+id/tv_track_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/tv_track_info"
-        android:text="99:99"/>
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tv_track_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Artist - Title"/>
+        <TextView
+            android:id="@+id/tv_track_current_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/tv_track_info"
+            android:text="00:00"/>
+        <TextView
+            android:id="@+id/tv_track_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/tv_track_info"
+            android:text="99:99"/>
 
-    <SeekBar
-        android:id="@+id/sb_track_position_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:max="100"
-        android:layout_toRightOf="@id/tv_track_current_position"
-        android:layout_toLeftOf="@id/tv_track_duration"
-        android:layout_below="@id/tv_track_info"/>
+        <SeekBar
+            android:id="@+id/sb_track_position_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:layout_toRightOf="@id/tv_track_current_position"
+            android:layout_toLeftOf="@id/tv_track_duration"
+            android:layout_below="@id/tv_track_info"/>
 
-    <LinearLayout
-        android:layout_below="@id/sb_track_position_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
-        <ImageButton
-            android:id="@+id/btn_previous_track"
-            android:src="@android:drawable/ic_media_previous"
+        <LinearLayout
+            android:layout_below="@id/sb_track_position_bar"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <ImageButton
-            android:id="@+id/btn_play_pause"
-            android:src="@drawable/player_pause_play_selector"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <ImageButton
-            android:id="@+id/btn_next_track"
-            android:src="@android:drawable/ic_media_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <ImageButton
-            android:id="@+id/btn_loop_track"
-            android:src="@drawable/loop_icon_selector"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btn_previous_track"
+                android:src="@android:drawable/ic_media_previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <ImageButton
+                android:id="@+id/btn_play_pause"
+                android:src="@drawable/player_pause_play_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <ImageButton
+                android:id="@+id/btn_next_track"
+                android:src="@android:drawable/ic_media_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <ImageButton
+                android:id="@+id/btn_loop_track"
+                android:src="@drawable/loop_icon_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </RelativeLayout>
 
-</RelativeLayout>
+</LinearLayout>

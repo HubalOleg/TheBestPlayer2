@@ -4,4 +4,10 @@
     <string name="permission_available_storage">Storage Permission has been granted. Preview can now be opened.</string>
     <string name="permissions_not_granted">Permissions were not granted.</string>
     <string name="ok">OK</string>
+    <string-array name="spinner_sort_array">
+        <item>No sort</item>
+        <item>Title</item>
+        <item>Artist</item>
+        <item>Duration</item>
+    </string-array>
 </resources>

@@ -72,6 +72,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         @Override
         public void stop() {
             isPlaying = false;
+            mView.clearTrackInfo();
             mView.onUpdatePlayPauseButton(isPlaying);
         }
 
@@ -118,6 +119,8 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
                 isLooping = mMusicService.isLooping();
+                isPlaying = mMusicService.isPlaying();
+                mView.onUpdatePlayPauseButton(isPlaying);
                 mView.showLooping(isLooping);
             }
         }

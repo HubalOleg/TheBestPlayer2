@@ -8,6 +8,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.oleg.hubal.thebestplayer.R;
 import com.oleg.hubal.thebestplayer.adapter.TrackListAdapter;
@@ -31,7 +34,7 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
 
     private LinearLayoutManager mLayoutManager;
 
-    private int mDisplayHeight;
+    private Spinner mSortSpinner;
 
 //    LISTENERS
 
@@ -44,6 +47,18 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         @Override
         public void onQueueClicked(int position) {
             mPresenter.onQueueSelected(position);
+        }
+    };
+
+    private AdapterView.OnItemSelectedListener mOnItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            mPresenter.onSortItems(adapterView.getItemAtPosition(i).toString());
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+
         }
     };
 
@@ -76,6 +91,13 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracklist, container, false);
 
+        mSortSpinner = (Spinner) view.findViewById(R.id.spr_sort_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.spinner_sort_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSortSpinner.setAdapter(adapter);
+        mSortSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+
         RecyclerView trackRecyclerView = (RecyclerView) view.findViewById(R.id.rv_track_list_recycler);
         trackRecyclerView.setHasFixedSize(true);
 
@@ -86,7 +108,6 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         trackRecyclerView.setAdapter(mTrackListAdapter);
 
         mPresenter.onFillTrackList();
-
         return view;
     }
 
@@ -111,6 +132,11 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     }
 
     @Override
+    public void unSelectAll() {
+        mTrackListAdapter.unSelectItems();
+    }
+
+    @Override
     public void showTrackList(List<TrackItem> trackList) {
         mTrackListAdapter.setData(trackList);
     }
@@ -118,6 +144,11 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     @Override
     public void scrollListToPosition(int position) {
         mLayoutManager.scrollToPositionWithOffset(position, mLayoutManager.getHeight() / 2);
+        mTrackListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showSortedList() {
         mTrackListAdapter.notifyDataSetChanged();
     }
 

@@ -16,4 +16,6 @@ public interface TrackListViewContract {
     void launchTrackListLoader();
     void setItemQueue(int itemPosition);
     void scrollListToPosition(int position);
+    void showSortedList();
+    void unSelectAll();
 }

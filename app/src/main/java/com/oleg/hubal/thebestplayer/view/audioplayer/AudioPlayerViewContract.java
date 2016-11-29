@@ -12,4 +12,5 @@ public interface AudioPlayerViewContract {
     void changeSeekBarPosition(int position);
     void changeTrackPositionTextView(String currentPosition);
     void showLooping(boolean isLooping);
+    void clearTrackInfo();
 }

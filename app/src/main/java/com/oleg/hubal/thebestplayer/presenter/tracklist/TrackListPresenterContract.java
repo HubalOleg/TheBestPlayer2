@@ -17,5 +17,5 @@ public interface TrackListPresenterContract extends BasePresenter {
     void onQueueSelected(int itemPosition);
     void onPause();
     void onResume();
-
+    void onSortItems(String sortBy);
 }

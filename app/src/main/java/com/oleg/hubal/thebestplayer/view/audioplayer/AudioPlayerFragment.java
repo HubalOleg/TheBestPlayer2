@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.presenter.audioplayer.AudioPlayerPresenter;
 import com.oleg.hubal.thebestplayer.presenter.audioplayer.AudioPlayerPresenterContract;
 import com.oleg.hubal.thebestplayer.utility.Utils;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by User on 23.11.2016.
@@ -30,6 +32,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     private TextView mTrackInfoTextView;
     private TextView mTrackPositionTextView;
     private TextView mTrackDurationTextView;
+    private ImageView mBigAlbumArtImageView;
     private ImageButton mPlayPauseImageButton;
     private ImageButton mPreviousTrackImageButton;
     private ImageButton mNextTrackImageButton;
@@ -69,6 +72,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         mPreviousTrackImageButton = (ImageButton) view.findViewById(R.id.btn_previous_track);
         mNextTrackImageButton = (ImageButton) view.findViewById(R.id.btn_next_track);
         mLoopTrackImageButton = (ImageButton) view.findViewById(R.id.btn_loop_track);
+        mBigAlbumArtImageView = (ImageView) view.findViewById(R.id.iv_big_album_art);
     }
 
     private void setListeners() {
@@ -119,11 +123,21 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
         updateUI();
         mTrackInfoTextView.setText(trackItem.getArtist() + " - " + trackItem.getTitle());
         mTrackDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
+        Picasso.with(getContext()).load(trackItem.getAlbumImage()).into(mBigAlbumArtImageView);
     }
 
     private void updateUI() {
         mTrackPositionSeekBack.setProgress(0);
         mTrackPositionTextView.setText("00:00");
+    }
+
+    @Override
+    public void clearTrackInfo() {
+        mTrackPositionSeekBack.setProgress(0);
+        mTrackPositionTextView.setText("00:00");
+        mTrackDurationTextView.setText("99:99");
+        mTrackInfoTextView.setText("");
+        mBigAlbumArtImageView.setImageResource(android.R.color.transparent);
     }
 
     @Override

@@ -18,11 +18,16 @@ import android.support.v4.content.Loader;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
 import com.oleg.hubal.thebestplayer.service.MusicService;
+import com.oleg.hubal.thebestplayer.utility.Constants;
 import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
+import com.oleg.hubal.thebestplayer.utility.TrackArtistComparator;
+import com.oleg.hubal.thebestplayer.utility.TrackDurationComparator;
+import com.oleg.hubal.thebestplayer.utility.TrackTitleComparator;
 import com.oleg.hubal.thebestplayer.utility.Utils;
 import com.oleg.hubal.thebestplayer.view.tracklist.TrackListViewContract;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +49,8 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private MusicService mMusicService;
     private int mCurrentPosition = -1;
+
+    private String mCurrentSortOrder = Constants.SORT_NONE;
 
     private boolean isServiceBound = false;
 
@@ -240,6 +247,37 @@ public class TrackListPresenter implements TrackListPresenterContract {
     public void onFillTrackList() {
         if (!Utils.isServiceRunning(MusicService.class.getName(), mContext)) {
             mView.launchTrackListLoader();
+        }
+    }
+
+    @Override
+    public void onSortItems(String sortBy) {
+        if (mTrackItems != null &&
+                !sortBy.equals(Constants.SORT_NONE) &&
+                !sortBy.equals(mCurrentSortOrder)) {
+
+            mQueueList.clear();
+            for (TrackItem item : mTrackItems) {
+                item.setQueuePosition(-1);
+            }
+            mView.unSelectAll();
+
+            if (isServiceBound)
+                mMusicService.stopMedia();
+
+            switch (sortBy) {
+                case Constants.SORT_BY_DURATION:
+                    Collections.sort(mTrackItems, new TrackDurationComparator());
+                    break;
+                case Constants.SORT_BY_ARTIST:
+                    Collections.sort(mTrackItems, new TrackArtistComparator());
+                    break;
+                case Constants.SORT_BY_TITLE:
+                    Collections.sort(mTrackItems, new TrackTitleComparator());
+                    break;
+            }
+            mCurrentSortOrder = sortBy;
+            mView.showSortedList();
         }
     }
 

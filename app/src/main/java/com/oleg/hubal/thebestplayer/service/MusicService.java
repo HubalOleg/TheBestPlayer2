@@ -371,9 +371,9 @@ public class MusicService extends Service {
         return isLooping;
     }
 
-    private void stopMedia() {
+    public void stopMedia() {
+        stopProgressUpdate();
         mMediaPlayer.stop();
-        mMediaPlayer.release();
         isPlaying = false;
         sendActionBroadcast(ACTION_STOP);
     }

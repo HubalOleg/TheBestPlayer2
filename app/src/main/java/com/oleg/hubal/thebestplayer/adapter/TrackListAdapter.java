@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.oleg.hubal.thebestplayer.R;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
+import com.oleg.hubal.thebestplayer.utility.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public void setTrackSelected(int position) {
         if (mActivePosition != -1) {
             mTrackItems.get(mActivePosition).setSelected(false);
-            if (mViewHolders[position] != null) {
+            if (mViewHolders[mActivePosition] != null) {
                 mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
             }
         }
@@ -74,6 +75,15 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         mActivePosition = position;
     }
 
+    public void unSelectItems() {
+        if (mActivePosition != -1) {
+            mTrackItems.get(mActivePosition).setSelected(false);
+            if (mViewHolders[mActivePosition] != null) {
+                mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
+            }
+        }
+    }
+
     public void setQueueSelected(int itemPosition) {
         if (mViewHolders[itemPosition] != null) {
             mViewHolders[itemPosition].setQueue();
@@ -81,10 +91,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-
         private View mItemView;
         private TextView mArtistTextView;
         private TextView mTitleTextView;
+        private TextView mDurationTextView;
         private Button mPlaylistQueueButton;
         private ImageView mAlbumArtImageView;
         private TrackItem mTrackItem;
@@ -95,15 +105,16 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             mAlbumArtImageView = (ImageView) itemView.findViewById(R.id.iv_album_art);
             mArtistTextView = (TextView) itemView.findViewById(R.id.tv_artist);
             mTitleTextView = (TextView) itemView.findViewById(R.id.tv_title);
+            mDurationTextView = (TextView) itemView.findViewById(R.id.tv_duration);
             mPlaylistQueueButton = (Button) itemView.findViewById(R.id.btn_playlist_queue);
         }
 
         public void onBind(final int position, TrackItem trackItem) {
             mTrackItem = trackItem;
             Picasso.with(mContext).load(trackItem.getAlbumImage()).into(mAlbumArtImageView);
-            mArtistTextView.setText(trackItem.getArtist());
-            mTitleTextView.setText(trackItem.getTitle());
-
+            mArtistTextView.setText("Artist: " + trackItem.getArtist());
+            mTitleTextView.setText("Title: " + trackItem.getTitle());
+            mDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
             mItemView.setSelected(trackItem.isSelected());
 
             int queuePosition = trackItem.getQueuePosition();

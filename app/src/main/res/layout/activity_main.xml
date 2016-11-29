@@ -11,15 +11,11 @@
     <FrameLayout
         android:id="@+id/fl_audio_player"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        />
     <FrameLayout
         android:id="@+id/fl_player_track_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-    <FrameLayout
-        android:id="@+id/fl_player_list_manager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
 </LinearLayout>
