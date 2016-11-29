@@ -64,8 +64,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
         }
 
-
-
         mTrackItems.get(position).setSelected(true);
         if (mViewHolders[position] != null) {
             mViewHolders[position].changeSelection(mTrackItems.get(position).isSelected());
@@ -74,8 +72,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         mActivePosition = position;
     }
 
-    public void setQueueSelected(int position) {
-
+    public void setQueueSelected(int itemPosition, int queuePosition) {
+        mViewHolders[itemPosition].setQueue(queuePosition);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -122,6 +120,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
         public void changeSelection(boolean isSelected) {
             mItemView.setSelected(isSelected);
+        }
+
+        public void setQueue(int position) {
+            mPlaylistQueueButton.setText(String.valueOf(position));
         }
     }
 

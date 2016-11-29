@@ -163,6 +163,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
     }
 
+    @Override
+    public void onQueueSelected(int itemPosition) {
+        mView.setItemQueue(itemPosition, 0);
+    }
+
     private void changeTrack() {
         if (mMusicService != null) {
             mMusicService.playTrackByPosition(mCurrentPosition);

@@ -39,7 +39,7 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
 
         @Override
         public void onQueueClicked(int position) {
-            mTrackListAdapter.setQueueSelected(position);
+            mPresenter.onQueueSelected(position);
         }
     };
 
@@ -89,6 +89,11 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     @Override
     public void setSelectedItem(int position) {
         mTrackListAdapter.setTrackSelected(position);
+    }
+
+    @Override
+    public void setItemQueue(int itemPosition,int queuePosition) {
+        mTrackListAdapter.setQueueSelected(itemPosition, queuePosition);
     }
 
     @Override
