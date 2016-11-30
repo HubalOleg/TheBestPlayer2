@@ -36,24 +36,21 @@ import java.util.List;
 
 public class TrackListPresenter implements TrackListPresenterContract {
 
-    private static final String TAG = "TrackListPresenter";
-
-    private final Context mContext;
-    private Intent mIntent;
     private TrackListViewContract mView;
-    private List<TrackItem> mTrackItems;
-
-    private List<Integer> mQueueList = new ArrayList();
+    private final Context mContext;
 
     private AudioPlayerReceiver mPlayerReceiver;
-
     private MusicService mMusicService;
     private int mCurrentPosition = -1;
+    private Intent mIntent;
+
+    private List<Integer> mQueueList = new ArrayList();
+    private List<TrackItem> mTrackItems;
 
     private String mCurrentSortOrder = Constants.SORT_NONE;
 
-    private String mCursorLoaderSelection = null;
     private String[] mCursorLoaderSelectionArgs = null;
+    private String mCursorLoaderSelection = null;
 
     private boolean isServiceBound = false;
 
@@ -61,61 +58,47 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
         @Override
-        public void play() {
-
-        }
+        public void onPlay() {}
 
         @Override
-        public void pause() {
-
-        }
+        public void onPause() {}
 
         @Override
-        public void next() {
+        public void onNextTrack() {
             mCurrentPosition++;
-            if (mCurrentPosition >= mTrackItems.size()) {
+            if (mCurrentPosition >= mTrackItems.size())
                 mCurrentPosition = 0;
-            }
 
-            mView.setSelectedItem(mCurrentPosition);
-            mView.scrollListToPosition(mCurrentPosition);
+            setSelectedItemAndScrollToPosition(mCurrentPosition);
         }
 
         @Override
-        public void previous() {
+        public void onPreviousTrack() {
             mCurrentPosition--;
             if (mCurrentPosition < 0)
                 mCurrentPosition = mTrackItems.size() - 1;
 
-            mView.setSelectedItem(mCurrentPosition);
-            mView.scrollListToPosition(mCurrentPosition);
+            setSelectedItemAndScrollToPosition(mCurrentPosition);
         }
 
         @Override
-        public void stop() {
-
-        }
+        public void onStopMedia() {}
 
         @Override
-        public void changeTrack() {
-
-        }
+        public void onChangeTrack() {}
 
         @Override
-        public void changeCurrentSeekBarPosition(long currentPosition ) {
-        }
+        public void onChangeTrackPosition(long currentPosition ) {}
 
         @Override
-        public void queue(int position) {
+        public void onTrackFromQueue(int position) {
             mCurrentPosition = position;
             mView.setItemQueue(mCurrentPosition);
 
-            for (int i : mQueueList) {
+            for (int i : mQueueList)
                 mView.setItemQueue(i);
-            }
 
-            mView.setSelectedItem(mCurrentPosition);
-            mView.scrollListToPosition(mCurrentPosition);
+            setSelectedItemAndScrollToPosition(mCurrentPosition);
         }
     };
 
@@ -149,15 +132,15 @@ public class TrackListPresenter implements TrackListPresenterContract {
             isServiceBound = true;
 
             if (mMusicService.isTrackListExist()) {
-                getDataFromService();
+                pullDataFromService();
             } else if (mTrackItems != null) {
-                setDataToService(mTrackItems);
+                pushDataToService();
             }
 
             if (mMusicService.isQueueListExist()) {
                 mQueueList = mMusicService.getQueueList();
             } else {
-                setQueueListToService(mQueueList);
+                pushQueueListToService();
             }
 
             if (mMusicService.getCurrentPosition() == -1 && mCurrentPosition != -1) {
@@ -178,7 +161,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
         mView = view;
         mPlayerReceiver = new AudioPlayerReceiver(mOnPlayerActionListener);
         mIntent = new Intent(mContext, MusicService.class);
-        bindServiceIfRunning();
+        bindServiceIfExist();
     }
 
     @Override
@@ -193,6 +176,17 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
     }
 
+    private void changeTrack() {
+        if (mMusicService != null) {
+            mMusicService.playTrackByPosition(mCurrentPosition);
+        }
+    }
+
+    private void launchService() {
+        mContext.startService(mIntent);
+        mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
     @Override
     public void onQueueSelected(int itemPosition) {
         if (mTrackItems.get(itemPosition).getQueuePosition() == -1) {
@@ -200,27 +194,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
         } else {
             removeFromQueue(itemPosition);
         }
-        setQueueListToService(mQueueList);
-    }
-
-    private void setQueueListToService(List<Integer> queueList) {
-        if (isServiceBound) {
-            mMusicService.setQueueList(queueList);
-        }
-    }
-
-    private void getDataFromService() {
-        mTrackItems = mMusicService.getTrackItems();
-        mView.setTrackItems(mTrackItems);
-        mCurrentPosition = mMusicService.getCurrentPosition();
-        if (mCurrentPosition != -1) {
-            mView.scrollListToPosition(mCurrentPosition);
-            mView.setSelectedItem(mCurrentPosition);
-        }
-    }
-
-    private void setDataToService(List<TrackItem> trackItems) {
-        mMusicService.setTrackItems(trackItems);
+        pushQueueListToService();
     }
 
     private void addToQueue(int itemPosition) {
@@ -242,20 +216,24 @@ public class TrackListPresenter implements TrackListPresenterContract {
         mView.setItemQueue(itemPosition);
     }
 
-    private void changeTrack() {
-        if (mMusicService != null) {
-            mMusicService.playTrackByPosition(mCurrentPosition);
+    private void pushQueueListToService() {
+        if (isServiceBound) {
+            mMusicService.setQueueList(mQueueList);
         }
     }
 
-    private void launchService() {
-        mContext.startService(mIntent);
-        mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+    private void pullDataFromService() {
+        mTrackItems = mMusicService.getTrackItems();
+        mView.setTrackItems(mTrackItems);
+        mCurrentPosition = mMusicService.getCurrentPosition();
+        if (mCurrentPosition != -1) {
+            mView.scrollListToPosition(mCurrentPosition);
+            mView.setSelectedItem(mCurrentPosition);
+        }
     }
 
-    @Override
-    public LoaderManager.LoaderCallbacks<Cursor> getTrackListLoader() {
-        return mCursorLoader;
+    private void pushDataToService() {
+        mMusicService.setTrackItems(mTrackItems);
     }
 
     @Override
@@ -322,25 +300,8 @@ public class TrackListPresenter implements TrackListPresenterContract {
     }
 
     @Override
-    public void onPause() {
-        mContext.unregisterReceiver(mPlayerReceiver);
-        if (isServiceBound) {
-            mContext.unbindService(mMusicServiceConnection);
-            isServiceBound = false;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        bindServiceIfRunning();
-        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
-        mContext.registerReceiver(mPlayerReceiver, filter);
-    }
-
-    private void bindServiceIfRunning() {
-        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
-            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-        }
+    public LoaderManager.LoaderCallbacks<Cursor> getTrackListLoader() {
+        return mCursorLoader;
     }
 
     private CursorLoader createCursorLoader() {
@@ -372,4 +333,30 @@ public class TrackListPresenter implements TrackListPresenterContract {
         return trackItems;
     }
 
+    private void setSelectedItemAndScrollToPosition(int position) {
+        mView.scrollListToPosition(position);
+        mView.setSelectedItem(position);
+    }
+
+    @Override
+    public void onResume() {
+        bindServiceIfExist();
+        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
+        mContext.registerReceiver(mPlayerReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        mContext.unregisterReceiver(mPlayerReceiver);
+        if (isServiceBound) {
+            mContext.unbindService(mMusicServiceConnection);
+            isServiceBound = false;
+        }
+    }
+
+    private void bindServiceIfExist() {
+        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
+            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
 }

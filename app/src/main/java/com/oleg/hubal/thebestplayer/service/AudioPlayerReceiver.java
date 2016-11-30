@@ -29,28 +29,28 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
 
         switch (action) {
             case MusicService.ACTION_PLAY:
-                mOnPlayerActionListener.play();
+                mOnPlayerActionListener.onPlay();
                 break;
             case MusicService.ACTION_PAUSE:
-                mOnPlayerActionListener.pause();
+                mOnPlayerActionListener.onPause();
                 break;
             case MusicService.ACTION_NEXT:
-                mOnPlayerActionListener.next();
+                mOnPlayerActionListener.onNextTrack();
                 break;
             case MusicService.ACTION_PREVIOUS:
-                mOnPlayerActionListener.previous();
+                mOnPlayerActionListener.onPreviousTrack();
                 break;
             case MusicService.ACTION_STOP:
-                mOnPlayerActionListener.stop();
+                mOnPlayerActionListener.onStopMedia();
                 break;
             case MusicService.ACTION_CHANGE_TRACK:
-                mOnPlayerActionListener.changeTrack();
+                mOnPlayerActionListener.onChangeTrack();
                 break;
             case MusicService.ACTION_CHANGE_CURRENT_POSITION:
-                mOnPlayerActionListener.changeCurrentSeekBarPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
+                mOnPlayerActionListener.onChangeTrackPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
                 break;
             case MusicService.ACTION_QUEUE:
-                mOnPlayerActionListener.queue(intent.getIntExtra(PARAM_QUEUE_POSITION, 0));
+                mOnPlayerActionListener.onTrackFromQueue(intent.getIntExtra(PARAM_QUEUE_POSITION, 0));
                 break;
         }
     }

@@ -20,18 +20,17 @@ import com.oleg.hubal.thebestplayer.view.audioplayer.AudioPlayerViewContract;
 
 public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
-    private final Context mContext;
     private AudioPlayerViewContract mView;
-
-    private MusicService mMusicService;
-    private boolean isServiceBound = false;
-    private Intent mIntent;
+    private final Context mContext;
 
     private AudioPlayerReceiver mPlayerReceiver;
+    private boolean isServiceBound = false;
+    private MusicService mMusicService;
+    private Intent mIntent;
 
-    private TrackItem mCurrentItem;
     private long mCurrentTrackDuration = 0;
     private long mCurrentTrackPosition;
+    private TrackItem mCurrentItem;
 
     private boolean isPlaying = false;
     private boolean isLooping = false;
@@ -41,44 +40,44 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     private OnPlayerActionListener mOnPlayerActionListener = new OnPlayerActionListener() {
 
         @Override
-        public void play() {
+        public void onPlay() {
             mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
-        public void pause() {
+        public void onPause() {
             mView.onUpdatePlayPauseButton(isPlaying = false);
         }
 
         @Override
-        public void next() {
+        public void onNextTrack() {
             mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
-        public void previous() {
+        public void onPreviousTrack() {
             mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
-        public void stop() {
+        public void onStopMedia() {
             mView.clearTrackInfo();
             mView.onUpdatePlayPauseButton(isPlaying = false);
         }
 
         @Override
-        public void changeTrack() {
+        public void onChangeTrack() {
             mView.onUpdatePlayPauseButton(isPlaying = true);
             if (isServiceBound) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
             } else {
-                bindServiceIfRunning();
+                bindServiceIfExist();
             }
         }
 
         @Override
-        public void changeCurrentSeekBarPosition(long currentPosition) {
+        public void onChangeTrackPosition(long currentPosition) {
             int position;
             mCurrentTrackDuration = mCurrentItem.getDuration();
             mCurrentTrackPosition = currentPosition;
@@ -91,7 +90,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         }
 
         @Override
-        public void queue(int position) {
+        public void onTrackFromQueue(int position) {
 
         }
     };
@@ -105,7 +104,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             isServiceBound = true;
 
             if (mMusicService.isTrackListExist() && mMusicService.getCurrentPosition() != -1) {
-                getDataFromService();
+                pullDataFromService();
             }
         }
 
@@ -122,7 +121,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         mView = view;
         mPlayerReceiver = new AudioPlayerReceiver(mOnPlayerActionListener);
         mIntent = new Intent(mContext, MusicService.class);
-        bindServiceIfRunning();
+        bindServiceIfExist();
     }
 
     @Override
@@ -151,22 +150,6 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     }
 
     @Override
-    public void onPause() {
-        if (isServiceBound) {
-            mContext.unbindService(mMusicServiceConnection);
-            isServiceBound = false;
-        }
-        mContext.unregisterReceiver(mPlayerReceiver);
-    }
-
-    @Override
-    public void onResume() {
-        bindServiceIfRunning();
-        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
-        mContext.registerReceiver(mPlayerReceiver, filter);
-    }
-
-    @Override
     public void onSeekTrackTo(int position) {
         if (isServiceBound) {
             mCurrentTrackDuration = mCurrentItem.getDuration();
@@ -187,18 +170,34 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         }
     }
 
-    private void bindServiceIfRunning() {
-        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
-            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+    @Override
+    public void onPause() {
+        if (isServiceBound) {
+            mContext.unbindService(mMusicServiceConnection);
+            isServiceBound = false;
         }
+        mContext.unregisterReceiver(mPlayerReceiver);
     }
 
-    private void getDataFromService() {
+    @Override
+    public void onResume() {
+        bindServiceIfExist();
+        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
+        mContext.registerReceiver(mPlayerReceiver, filter);
+    }
+
+    private void pullDataFromService() {
         mCurrentItem = mMusicService.getCurrentItem();
         mView.showTrackInfo(mCurrentItem);
         isLooping = mMusicService.isLooping();
         isPlaying = mMusicService.isPlaying();
         mView.onUpdatePlayPauseButton(isPlaying);
         mView.showLooping(isLooping);
+    }
+
+    private void bindServiceIfExist() {
+        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
+            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 }

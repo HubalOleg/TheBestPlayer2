@@ -10,11 +10,11 @@ import android.support.v4.app.LoaderManager;
 public interface TrackListPresenterContract {
 
     LoaderManager.LoaderCallbacks<Cursor> getTrackListLoader();
-    void onFillTrackList();
-    void onTrackSelected(int position);
-    void onQueueSelected(int itemPosition);
-    void onPause();
-    void onResume();
-    void onSortItems(String sortBy);
     void onSearchItems(String searchBy, String searchKey);
+    void onQueueSelected(int itemPosition);
+    void onTrackSelected(int position);
+    void onSortItems(String sortBy);
+    void onFillTrackList();
+    void onResume();
+    void onPause();
 }

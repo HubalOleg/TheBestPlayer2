@@ -5,12 +5,12 @@ package com.oleg.hubal.thebestplayer.utility;
  */
 
 public interface OnPlayerActionListener {
-    void changeCurrentSeekBarPosition(long currentPosition);
-    void play();
-    void pause();
-    void next();
-    void previous();
-    void stop();
-    void changeTrack();
-    void queue(int position);
+    void onChangeTrackPosition(long currentPosition);
+    void onPlay();
+    void onPause();
+    void onNextTrack();
+    void onPreviousTrack();
+    void onStopMedia();
+    void onChangeTrack();
+    void onTrackFromQueue(int position);
 }
