@@ -12,11 +12,6 @@ import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
 
 public class AudioPlayerReceiver extends BroadcastReceiver {
 
-    public static final String BROADCAST_ACTION = "com.oleg.hubal.thebestplayer.ACTION_BROADCAST";
-    public static final String PARAM_ACTION = "action";
-    public static final String PARAM_CURRENT_POSITION = "current_position";
-    public static final String PARAM_QUEUE_POSITION = "queue_position";
-
    OnPlayerActionListener mOnPlayerActionListener;
 
     public AudioPlayerReceiver(OnPlayerActionListener onPlayerActionListener) {
@@ -25,32 +20,34 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getStringExtra(PARAM_ACTION);
+        String action = intent.getStringExtra(ServiceConstants.PARAM_ACTION);
 
         switch (action) {
-            case MusicService.ACTION_PLAY:
+            case ServiceConstants.ACTION_PLAY:
                 mOnPlayerActionListener.onPlay();
                 break;
-            case MusicService.ACTION_PAUSE:
+            case ServiceConstants.ACTION_PAUSE:
                 mOnPlayerActionListener.onPause();
                 break;
-            case MusicService.ACTION_NEXT:
+            case ServiceConstants.ACTION_NEXT:
                 mOnPlayerActionListener.onNextTrack();
                 break;
-            case MusicService.ACTION_PREVIOUS:
+            case ServiceConstants.ACTION_PREVIOUS:
                 mOnPlayerActionListener.onPreviousTrack();
                 break;
-            case MusicService.ACTION_STOP:
+            case ServiceConstants.ACTION_STOP:
                 mOnPlayerActionListener.onStopMedia();
                 break;
-            case MusicService.ACTION_CHANGE_TRACK:
+            case ServiceConstants.ACTION_CHANGE_TRACK:
                 mOnPlayerActionListener.onChangeTrack();
                 break;
-            case MusicService.ACTION_CHANGE_CURRENT_POSITION:
-                mOnPlayerActionListener.onChangeTrackPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
+            case ServiceConstants.ACTION_CHANGE_CURRENT_POSITION:
+                int currentPosition = intent.getIntExtra(ServiceConstants.PARAM_CURRENT_POSITION, 0);
+                mOnPlayerActionListener.onChangeTrackPosition(currentPosition);
                 break;
-            case MusicService.ACTION_QUEUE:
-                mOnPlayerActionListener.onTrackFromQueue(intent.getIntExtra(PARAM_QUEUE_POSITION, 0));
+            case ServiceConstants.ACTION_QUEUE:
+                int queuePosition = intent.getIntExtra(ServiceConstants.PARAM_QUEUE_POSITION, 0);
+                mOnPlayerActionListener.onTrackFromQueue(queuePosition);
                 break;
         }
     }

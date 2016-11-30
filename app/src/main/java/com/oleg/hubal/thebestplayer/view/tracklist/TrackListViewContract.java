@@ -11,12 +11,11 @@ import java.util.List;
 public interface TrackListViewContract {
 
     void showTrackList(List<TrackItem> trackList);
-    void setSelectedItem(int position);
-    void setTrackItems(List<TrackItem> trackItems);
-    void launchTrackListLoader();
-    void setItemQueue(int itemPosition);
-    void scrollListToPosition(int position);
+    void showSelectedItem(int position);
+    void showItemQueue(int itemPosition);
     void showSortedList();
     void unSelectAll();
+    void scrollListToPosition(int position);
+    void launchTrackListLoader();
     void launchLoaderForSearch();
 }

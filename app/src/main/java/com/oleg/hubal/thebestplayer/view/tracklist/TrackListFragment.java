@@ -140,18 +140,29 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     }
 
     @Override
-    public void setSelectedItem(int position) {
+    public void showSelectedItem(int position) {
         mTrackListAdapter.setTrackSelected(position);
     }
 
     @Override
-    public void setItemQueue(int itemPosition) {
+    public void showItemQueue(int itemPosition) {
         mTrackListAdapter.setQueueSelected(itemPosition);
     }
 
     @Override
-    public void setTrackItems(List<TrackItem> trackItems) {
-        mTrackListAdapter.setData(trackItems);
+    public void showTrackList(List<TrackItem> trackList) {
+        mTrackListAdapter.setData(trackList);
+    }
+
+    @Override
+    public void showSortedList() {
+        mTrackListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void scrollListToPosition(int position) {
+        mLayoutManager.scrollToPositionWithOffset(position, mLayoutManager.getHeight() / 2);
+        mTrackListAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -167,22 +178,6 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     @Override
     public void unSelectAll() {
         mTrackListAdapter.unSelectItems();
-    }
-
-    @Override
-    public void showTrackList(List<TrackItem> trackList) {
-        mTrackListAdapter.setData(trackList);
-    }
-
-    @Override
-    public void scrollListToPosition(int position) {
-        mLayoutManager.scrollToPositionWithOffset(position, mLayoutManager.getHeight() / 2);
-        mTrackListAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void showSortedList() {
-        mTrackListAdapter.notifyDataSetChanged();
     }
 
     @Override

@@ -18,7 +18,7 @@ import android.support.v4.content.Loader;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
 import com.oleg.hubal.thebestplayer.service.MusicService;
-import com.oleg.hubal.thebestplayer.utility.Constants;
+import com.oleg.hubal.thebestplayer.service.ServiceConstants;
 import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
 import com.oleg.hubal.thebestplayer.utility.TrackArtistComparator;
 import com.oleg.hubal.thebestplayer.utility.TrackDurationComparator;
@@ -36,6 +36,18 @@ import java.util.List;
 
 public class TrackListPresenter implements TrackListPresenterContract {
 
+    public static final String SEARCH_ARTIST_SELECTION = MediaStore.Audio.AudioColumns.ARTIST + " LIKE ?";
+    public static final String SEARCH_TITLE_SELECTION = MediaStore.Audio.AudioColumns.TITLE + " LIKE ?";
+
+    public static final String SORT_BY_DURATION = "Duration";
+    public static final String SORT_BY_ARTIST = "Artist";
+    public static final String SORT_BY_TITLE = "Title";
+    public static final String SORT_NONE = "No sort";
+
+    public static final String SEARCH_NONE = "No search";
+    public static final String SEARCH_BY_ARTIST = "Artist";
+    public static final String SEARCH_BY_TITLE = "Title";
+
     private TrackListViewContract mView;
     private final Context mContext;
 
@@ -47,7 +59,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private List<Integer> mQueueList = new ArrayList();
     private List<TrackItem> mTrackItems;
 
-    private String mCurrentSortOrder = Constants.SORT_NONE;
+    private String mCurrentSortOrder = SORT_NONE;
 
     private String[] mCursorLoaderSelectionArgs = null;
     private String mCursorLoaderSelection = null;
@@ -93,10 +105,10 @@ public class TrackListPresenter implements TrackListPresenterContract {
         @Override
         public void onTrackFromQueue(int position) {
             mCurrentPosition = position;
-            mView.setItemQueue(mCurrentPosition);
+            mView.showItemQueue(mCurrentPosition);
 
             for (int i : mQueueList)
-                mView.setItemQueue(i);
+                mView.showItemQueue(i);
 
             setSelectedItemAndScrollToPosition(mCurrentPosition);
         }
@@ -167,7 +179,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     @Override
     public void onTrackSelected(int position) {
         mCurrentPosition = position;
-        mView.setSelectedItem(mCurrentPosition);
+        mView.showSelectedItem(mCurrentPosition);
 
         if (Utils.isServiceRunning(MusicService.class.getName(), mContext)) {
             changeTrack();
@@ -200,7 +212,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private void addToQueue(int itemPosition) {
         mQueueList.add(mQueueList.size(), itemPosition);
         mTrackItems.get(itemPosition).setQueuePosition(mQueueList.size());
-        mView.setItemQueue(itemPosition);
+        mView.showItemQueue(itemPosition);
     }
 
     private void removeFromQueue(int itemPosition) {
@@ -209,11 +221,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
             TrackItem itemFromQueue = mTrackItems.get(mQueueList.get(i));
             int newPosition = itemFromQueue.getQueuePosition() - 1;
             itemFromQueue.setQueuePosition(newPosition);
-            mView.setItemQueue(mQueueList.get(i));
+            mView.showItemQueue(mQueueList.get(i));
         }
         mQueueList.remove(queuePosition - 1);
         mTrackItems.get(itemPosition).setQueuePosition(-1);
-        mView.setItemQueue(itemPosition);
+        mView.showItemQueue(itemPosition);
     }
 
     private void pushQueueListToService() {
@@ -224,11 +236,11 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private void pullDataFromService() {
         mTrackItems = mMusicService.getTrackItems();
-        mView.setTrackItems(mTrackItems);
+        mView.showTrackList(mTrackItems);
         mCurrentPosition = mMusicService.getCurrentPosition();
         if (mCurrentPosition != -1) {
             mView.scrollListToPosition(mCurrentPosition);
-            mView.setSelectedItem(mCurrentPosition);
+            mView.showSelectedItem(mCurrentPosition);
         }
     }
 
@@ -246,7 +258,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     @Override
     public void onSortItems(String sortBy) {
         if (mTrackItems != null &&
-                !sortBy.equals(Constants.SORT_NONE) &&
+                !sortBy.equals(SORT_NONE) &&
                 !sortBy.equals(mCurrentSortOrder)) {
 
             mQueueList.clear();
@@ -260,13 +272,13 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
 
             switch (sortBy) {
-                case Constants.SORT_BY_DURATION:
+                case SORT_BY_DURATION:
                     Collections.sort(mTrackItems, new TrackDurationComparator());
                     break;
-                case Constants.SORT_BY_ARTIST:
+                case SORT_BY_ARTIST:
                     Collections.sort(mTrackItems, new TrackArtistComparator());
                     break;
-                case Constants.SORT_BY_TITLE:
+                case SORT_BY_TITLE:
                     Collections.sort(mTrackItems, new TrackTitleComparator());
                     break;
             }
@@ -283,16 +295,16 @@ public class TrackListPresenter implements TrackListPresenterContract {
             mMusicService.onSearchSortAction();
 
         switch (searchBy) {
-            case Constants.SEARCH_NONE:
+            case SEARCH_NONE:
                 mCursorLoaderSelection = null;
                 mCursorLoaderSelectionArgs = null;
                 break;
-            case Constants.SEARCH_BY_ARTIST:
-                mCursorLoaderSelection = Constants.SEARCH_ARTIST_SELECTION;
+            case SEARCH_BY_ARTIST:
+                mCursorLoaderSelection = SEARCH_ARTIST_SELECTION;
                 mCursorLoaderSelectionArgs = new String[] { "%" +  searchKey + "%"};
                 break;
-            case Constants.SEARCH_BY_TITLE:
-                mCursorLoaderSelection = Constants.SEARCH_TITLE_SELECTION;
+            case SEARCH_BY_TITLE:
+                mCursorLoaderSelection = SEARCH_TITLE_SELECTION;
                 mCursorLoaderSelectionArgs = new String[] { "%" +  searchKey + "%"};
                 break;
         }
@@ -335,13 +347,13 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private void setSelectedItemAndScrollToPosition(int position) {
         mView.scrollListToPosition(position);
-        mView.setSelectedItem(position);
+        mView.showSelectedItem(position);
     }
 
     @Override
     public void onResume() {
         bindServiceIfExist();
-        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
+        IntentFilter filter = new IntentFilter(ServiceConstants.BROADCAST_ACTION);
         mContext.registerReceiver(mPlayerReceiver, filter);
     }
 

@@ -24,8 +24,6 @@ import com.squareup.picasso.Picasso;
 
 public class AudioPlayerFragment extends Fragment implements AudioPlayerViewContract {
 
-    private static final String TAG = "AudioPlayerFragment";
-
     private AudioPlayerPresenterContract mPresenter;
 
     private SeekBar mTrackPositionSeekBack;
@@ -107,14 +105,10 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
