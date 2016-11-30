@@ -320,6 +320,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
                 String artist = data.getString(data.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                 artist = artist.replace("<unknown>", "");
                 String title = data.getString(data.getColumnIndex(MediaStore.Audio.Media.TITLE));
+
                 long duration = data.getLong(data.getColumnIndex(MediaStore.Audio.Media.DURATION));
                 trackItems.add(new TrackItem(path, albumImage, artist, title, duration));
             } while (data.moveToNext());

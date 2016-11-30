@@ -114,8 +114,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             Picasso.with(mContext).load(trackItem.getAlbumImage()).into(mAlbumArtImageView);
             mArtistTextView.setText(String.format(mContext.getString(R.string.artist), trackItem.getArtist()));
             mTitleTextView.setText(String.format(mContext.getString(R.string.title), trackItem.getTitle()));
-//            mArtistTextView.setText("Artist: " + trackItem.getArtist());
-//            mTitleTextView.setText("Title: " + trackItem.getTitle());
             mDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
             mItemView.setSelected(trackItem.isSelected());
 
