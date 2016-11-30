@@ -186,14 +186,6 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (mPresenter != null) {
-            mPresenter.onStop();
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         if (mPresenter != null) {

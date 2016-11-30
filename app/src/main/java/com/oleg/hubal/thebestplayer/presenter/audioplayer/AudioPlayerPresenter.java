@@ -20,8 +20,6 @@ import com.oleg.hubal.thebestplayer.view.audioplayer.AudioPlayerViewContract;
 
 public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
-    private static final String TAG = "AudioPlayerPresenter";
-
     private final Context mContext;
     private AudioPlayerViewContract mView;
 
@@ -30,8 +28,6 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     private Intent mIntent;
 
     private AudioPlayerReceiver mPlayerReceiver;
-
-
 
     private TrackItem mCurrentItem;
     private long mCurrentTrackDuration = 0;
@@ -46,40 +42,33 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
         @Override
         public void play() {
-            isPlaying = true;
-            mView.onUpdatePlayPauseButton(isPlaying);
+            mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
         public void pause() {
-            isPlaying = false;
-            mView.onUpdatePlayPauseButton(isPlaying);
-
+            mView.onUpdatePlayPauseButton(isPlaying = false);
         }
 
         @Override
         public void next() {
-            isPlaying = true;
-            mView.onUpdatePlayPauseButton(isPlaying);
+            mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
         public void previous() {
-            isPlaying = true;
-            mView.onUpdatePlayPauseButton(isPlaying);
+            mView.onUpdatePlayPauseButton(isPlaying = true);
         }
 
         @Override
         public void stop() {
-            isPlaying = false;
             mView.clearTrackInfo();
-            mView.onUpdatePlayPauseButton(isPlaying);
+            mView.onUpdatePlayPauseButton(isPlaying = false);
         }
 
         @Override
         public void changeTrack() {
-            isPlaying = true;
-            mView.onUpdatePlayPauseButton(isPlaying);
+            mView.onUpdatePlayPauseButton(isPlaying = true);
             if (isServiceBound) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
@@ -89,7 +78,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         }
 
         @Override
-        public void changeCurrentPosition(long currentPosition) {
+        public void changeCurrentSeekBarPosition(long currentPosition) {
             int position;
             mCurrentTrackDuration = mCurrentItem.getDuration();
             mCurrentTrackPosition = currentPosition;
@@ -116,12 +105,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             isServiceBound = true;
 
             if (mMusicService.isTrackListExist() && mMusicService.getCurrentPosition() != -1) {
-                mCurrentItem = mMusicService.getCurrentItem();
-                mView.showTrackInfo(mCurrentItem);
-                isLooping = mMusicService.isLooping();
-                isPlaying = mMusicService.isPlaying();
-                mView.onUpdatePlayPauseButton(isPlaying);
-                mView.showLooping(isLooping);
+                getDataFromService();
             }
         }
 
@@ -167,11 +151,6 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     }
 
     @Override
-    public void onStop() {
-
-    }
-
-    @Override
     public void onPause() {
         if (isServiceBound) {
             mContext.unbindService(mMusicServiceConnection);
@@ -212,5 +191,14 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
         if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
             mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
         }
+    }
+
+    private void getDataFromService() {
+        mCurrentItem = mMusicService.getCurrentItem();
+        mView.showTrackInfo(mCurrentItem);
+        isLooping = mMusicService.isLooping();
+        isPlaying = mMusicService.isPlaying();
+        mView.onUpdatePlayPauseButton(isPlaying);
+        mView.showLooping(isLooping);
     }
 }

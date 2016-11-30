@@ -5,7 +5,7 @@ package com.oleg.hubal.thebestplayer.utility;
  */
 
 public interface OnPlayerActionListener {
-    void changeCurrentPosition(long currentPosition);
+    void changeCurrentSeekBarPosition(long currentPosition);
     void play();
     void pause();
     void next();

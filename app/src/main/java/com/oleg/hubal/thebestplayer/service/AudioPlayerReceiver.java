@@ -47,7 +47,7 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
                 mOnPlayerActionListener.changeTrack();
                 break;
             case MusicService.ACTION_CHANGE_CURRENT_POSITION:
-                mOnPlayerActionListener.changeCurrentPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
+                mOnPlayerActionListener.changeCurrentSeekBarPosition(intent.getIntExtra(PARAM_CURRENT_POSITION, 0));
                 break;
             case MusicService.ACTION_QUEUE:
                 mOnPlayerActionListener.queue(intent.getIntExtra(PARAM_QUEUE_POSITION, 0));

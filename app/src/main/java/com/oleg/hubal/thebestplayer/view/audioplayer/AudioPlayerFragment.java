@@ -161,14 +161,6 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (mPresenter != null) {
-            mPresenter.onStop();
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         mPresenter.onPause();

@@ -102,7 +102,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
 
         @Override
-        public void changeCurrentPosition(long currentPosition ) {
+        public void changeCurrentSeekBarPosition(long currentPosition ) {
         }
 
         @Override
@@ -149,17 +149,15 @@ public class TrackListPresenter implements TrackListPresenterContract {
             isServiceBound = true;
 
             if (mMusicService.isTrackListExist()) {
-                mTrackItems = mMusicService.getTrackItems();
-                mView.setTrackItems(mTrackItems);
-                mCurrentPosition = mMusicService.getCurrentPosition();
+                getDataFromService();
             } else if (mTrackItems != null) {
-                mMusicService.setTrackItems(mTrackItems);
+                setDataToService(mTrackItems);
             }
 
             if (mMusicService.isQueueListExist()) {
                 mQueueList = mMusicService.getQueueList();
             } else {
-                setQueueListToService();
+                setQueueListToService(mQueueList);
             }
 
             if (mMusicService.getCurrentPosition() == -1 && mCurrentPosition != -1) {
@@ -202,13 +200,27 @@ public class TrackListPresenter implements TrackListPresenterContract {
         } else {
             removeFromQueue(itemPosition);
         }
-        setQueueListToService();
+        setQueueListToService(mQueueList);
     }
 
-    private void setQueueListToService() {
+    private void setQueueListToService(List<Integer> queueList) {
         if (isServiceBound) {
-            mMusicService.setQueueList(mQueueList);
+            mMusicService.setQueueList(queueList);
         }
+    }
+
+    private void getDataFromService() {
+        mTrackItems = mMusicService.getTrackItems();
+        mView.setTrackItems(mTrackItems);
+        mCurrentPosition = mMusicService.getCurrentPosition();
+        if (mCurrentPosition != -1) {
+            mView.scrollListToPosition(mCurrentPosition);
+            mView.setSelectedItem(mCurrentPosition);
+        }
+    }
+
+    private void setDataToService(List<TrackItem> trackItems) {
+        mMusicService.setTrackItems(trackItems);
     }
 
     private void addToQueue(int itemPosition) {
@@ -309,6 +321,28 @@ public class TrackListPresenter implements TrackListPresenterContract {
         mView.launchLoaderForSearch();
     }
 
+    @Override
+    public void onPause() {
+        mContext.unregisterReceiver(mPlayerReceiver);
+        if (isServiceBound) {
+            mContext.unbindService(mMusicServiceConnection);
+            isServiceBound = false;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        bindServiceIfRunning();
+        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
+        mContext.registerReceiver(mPlayerReceiver, filter);
+    }
+
+    private void bindServiceIfRunning() {
+        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
+            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
     private CursorLoader createCursorLoader() {
         return new CursorLoader(mContext,
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -338,29 +372,4 @@ public class TrackListPresenter implements TrackListPresenterContract {
         return trackItems;
     }
 
-    private void bindServiceIfRunning() {
-        if (Utils.isServiceRunning(MusicService.class.getName(), mContext) && !isServiceBound) {
-            mContext.bindService(mIntent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        mContext.unregisterReceiver(mPlayerReceiver);
-        if (isServiceBound) {
-            mContext.unbindService(mMusicServiceConnection);
-            isServiceBound = false;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        bindServiceIfRunning();
-        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
-        mContext.registerReceiver(mPlayerReceiver, filter);
-    }
-
-    @Override
-    public void onStop() {
-    }
 }
