@@ -2,8 +2,10 @@ package com.oleg.hubal.thebestplayer.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -47,6 +49,8 @@ public class MusicService extends Service {
     private NotificationCompat.Builder mNotificationBuilder;
 
     private final IBinder mMusicBind = new MusicBinder();
+
+    private HeadphoneReceiver mHeadphoneReceiver;
 
     private List<TrackItem> mTrackItems;
     private List<Integer> mQueueList = new ArrayList();
@@ -174,7 +178,10 @@ public class MusicService extends Service {
         initMediaPlayer();
         initMediaSession();
 
-//        createNotification();
+        mHeadphoneReceiver = new HeadphoneReceiver();
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(mHeadphoneReceiver, filter);
     }
 
     @Override
@@ -456,5 +463,24 @@ public class MusicService extends Service {
         public MusicService getService() {
             return MusicService.this;
         }
+    }
+
+    private class HeadphoneReceiver extends BroadcastReceiver {
+        private static final int STATE_UNPLUGGED = 0;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                if (intent.getIntExtra("state", -1) == STATE_UNPLUGGED) {
+                    pauseTrack();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mHeadphoneReceiver);
     }
 }
