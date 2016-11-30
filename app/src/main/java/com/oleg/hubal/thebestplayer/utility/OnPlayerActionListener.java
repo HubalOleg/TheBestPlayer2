@@ -6,11 +6,11 @@ package com.oleg.hubal.thebestplayer.utility;
 
 public interface OnPlayerActionListener {
     void onChangeTrackPosition(long currentPosition);
-    void onPlay();
-    void onPause();
-    void onNextTrack();
-    void onPreviousTrack();
-    void onStopMedia();
-    void onChangeTrack();
     void onTrackFromQueue(int position);
+    void onPreviousTrack();
+    void onChangeTrack();
+    void onNextTrack();
+    void onStopMedia();
+    void onPause();
+    void onPlay();
 }

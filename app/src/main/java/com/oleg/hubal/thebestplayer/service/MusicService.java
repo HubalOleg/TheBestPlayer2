@@ -51,9 +51,9 @@ public class MusicService extends Service {
     private MediaPlayer mMediaPlayer;
     private MediaSession mSession;
 
-    private int mCurrentPosition = -1;
     private boolean isPlaying = false;
     private boolean isLooping = false;
+    private int mCurrentPosition = -1;
 
     Handler mSeekHandler = new Handler();
 

@@ -134,8 +134,8 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
     @Override
     public void clearTrackInfo() {
         mTrackPositionSeekBack.setProgress(0);
-        mTrackPositionTextView.setText("00:00");
-        mTrackDurationTextView.setText("99:99");
+        mTrackPositionTextView.setText(R.string.duration_none);
+        mTrackDurationTextView.setText(R.string.duration_none);
         mTrackInfoTextView.setText("");
         mBigAlbumArtImageView.setImageResource(android.R.color.transparent);
     }
