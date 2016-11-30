@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.v4.app.NotificationCompat.Action;
+import static android.support.v4.app.NotificationCompat.CATEGORY_SERVICE;
 
 /**
  * Created by User on 23.11.2016.
@@ -312,6 +313,7 @@ public class MusicService extends Service {
                 .setContentText(artist)
                 .setContentIntent(notifyPendingIntent)
                 .setAutoCancel(false)
+                .setCategory(CATEGORY_SERVICE)
                 .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
                 .addAction(action)
                 .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
