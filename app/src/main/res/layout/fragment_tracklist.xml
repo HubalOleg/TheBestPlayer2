@@ -18,6 +18,10 @@
             android:id="@+id/spr_sort_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search: "/>
         <EditText
             android:id="@+id/et_search_key"
             android:layout_width="0dp"
@@ -27,10 +31,5 @@
             android:id="@+id/spr_search_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-        <Button
-            android:id="@+id/btn_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Search"/>
     </LinearLayout>
 </LinearLayout>

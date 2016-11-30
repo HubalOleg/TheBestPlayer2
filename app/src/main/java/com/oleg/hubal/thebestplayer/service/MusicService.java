@@ -1,6 +1,5 @@
 package com.oleg.hubal.thebestplayer.service;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -25,6 +24,8 @@ import com.oleg.hubal.thebestplayer.view.MainActivity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.v4.app.NotificationCompat.Action;
 
 /**
  * Created by User on 23.11.2016.
@@ -69,7 +70,7 @@ public class MusicService extends Service {
             mediaPlayer.start();
             sendActionBroadcast(ACTION_CHANGE_TRACK);
             isPlaying = true;
-            updateNotification();
+            createNotification();
             startProgressUpdate();
         }
     };
@@ -170,11 +171,9 @@ public class MusicService extends Service {
         super.onCreate();
 
         initMediaPlayer();
-
         initMediaSession();
 
-        createNotification();
-        startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
+//        createNotification();
     }
 
     @Override
@@ -279,8 +278,6 @@ public class MusicService extends Service {
     }
 
     private void createNotification() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-
         Intent notifyIntent = new Intent(getApplicationContext(), MainActivity.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent notifyPendingIntent =
@@ -290,19 +287,38 @@ public class MusicService extends Service {
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
 
+        Bitmap bitmap = getAlbumArt();
+
+        String title = "";
+        String artist = "";
+
+        if (mCurrentPosition != -1) {
+            artist = mTrackItems.get(mCurrentPosition).getArtist();
+            title = mTrackItems.get(mCurrentPosition).getTitle();
+        }
+
+        Action action;
+
+        if (isPlaying) {
+            action = generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE);
+        } else {
+            action = generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY);
+        }
+
         mNotificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setLargeIcon(bitmap)
-                .setContentTitle("Track title")
-                .setContentText("Artist - album")
+                .setContentTitle(title)
+                .setContentText(artist)
                 .setContentIntent(notifyPendingIntent)
                 .setAutoCancel(false)
                 .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
-                .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY))
-                .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE))
+                .addAction(action)
                 .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
                 .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", ACTION_STOP))
                 .setStyle(new NotificationCompat.MediaStyle());
+
+        startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
     }
 
     public void playTrackByPosition(int position) {
@@ -384,6 +400,7 @@ public class MusicService extends Service {
             stopProgressUpdate();
             mMediaPlayer.pause();
             isPlaying = false;
+            createNotification();
             sendActionBroadcast(ACTION_PAUSE);
         }
     }
@@ -393,6 +410,7 @@ public class MusicService extends Service {
             startProgressUpdate();
             mMediaPlayer.start();
             isPlaying = true;
+            createNotification();
             sendActionBroadcast(ACTION_PLAY);
         }
     }
@@ -406,6 +424,7 @@ public class MusicService extends Service {
         mCurrentPosition = -1;
         mMediaPlayer.stop();
         isPlaying = false;
+        createNotification();
         sendActionBroadcast(ACTION_STOP);
     }
 
@@ -417,34 +436,13 @@ public class MusicService extends Service {
         mSeekHandler.removeCallbacks(mUpdateRunnable);
     }
 
-    public void onSearchSortAction() {
-        stopMedia();
-        mNotificationBuilder.setContentText("Choose song...")
-                .setContentTitle("");
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
-    }
-
-    private static final String TAG = "MusicService";
-
-    private void updateNotification() {
-        Bitmap bitmap = getAlbumArt();
-
-
-        String artist = mTrackItems.get(mCurrentPosition).getArtist();
-        String title = mTrackItems.get(mCurrentPosition).getTitle();
-
-        mNotificationBuilder.setContentText(artist)
-                .setLargeIcon(bitmap)
-                .setContentTitle(title);
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
-    }
-
     private Bitmap getAlbumArt() {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(mTrackItems.get(mCurrentPosition).getPath());
-        byte[] data = mmr.getEmbeddedPicture();
+        byte[] data = null;
+        if (mCurrentPosition != -1) {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(mTrackItems.get(mCurrentPosition).getPath());
+            data = mmr.getEmbeddedPicture();
+        }
         if (data != null) {
             return BitmapFactory.decodeByteArray(data, 0, data.length);
         } else {

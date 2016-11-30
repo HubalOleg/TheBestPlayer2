@@ -9,13 +9,11 @@
     <string name="artist">Artist: %1$s</string>
     <string name="position_start">00:00</string>
     <string-array name="spinner_sort_array">
-        <item>No sort</item>
         <item>Title</item>
         <item>Artist</item>
         <item>Duration</item>
     </string-array>
     <string-array name="spinner_search_array">
-        <item>No search</item>
         <item>Artist</item>
         <item>Title</item>
     </string-array>

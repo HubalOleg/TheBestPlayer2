@@ -5,12 +5,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -40,7 +41,6 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     private Spinner mSortSpinner;
     private Spinner mSearchSpinner;
     private EditText mSearchKeyEditText;
-    private Button mSearchButton;
 
 //    LISTENERS
 
@@ -100,15 +100,19 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
         initSpinners(view);
 
         mSearchKeyEditText = (EditText) view.findViewById(R.id.et_search_key);
-
-        mSearchButton = (Button) view.findViewById(R.id.btn_search);
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
+        mSearchKeyEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 String searchKey = mSearchKeyEditText.getText().toString();
                 String searchBy = mSearchSpinner.getSelectedItem().toString();
                 mPresenter.onSearchItems(searchBy, searchKey);
             }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
         });
 
         RecyclerView trackRecyclerView = (RecyclerView) view.findViewById(R.id.rv_track_list_recycler);

@@ -47,7 +47,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     private List<Integer> mQueueList = new ArrayList();
     private List<TrackItem> mTrackItems;
 
-    private String mCurrentSortOrder = Constants.SORT_NONE;
+    private String mCurrentSortOrder = Constants.SORT_BY_TITLE;
 
     private String[] mCursorLoaderSelectionArgs = null;
     private String mCursorLoaderSelection = null;
@@ -247,9 +247,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     @Override
     public void onSortItems(String sortBy) {
-        if (mTrackItems != null &&
-                !sortBy.equals(Constants.SORT_NONE) &&
-                !sortBy.equals(mCurrentSortOrder)) {
+        if (mTrackItems != null && !sortBy.equals(mCurrentSortOrder)) {
 
             mQueueList.clear();
             for (TrackItem item : mTrackItems) {
@@ -258,7 +256,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
             mView.unSelectAll();
 
             if (isServiceBound)
-                mMusicService.onSearchSortAction();
+                mMusicService.stopMedia();
 
             switch (sortBy) {
                 case Constants.SORT_BY_DURATION:
@@ -281,13 +279,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
         mQueueList.clear();
 
         if (isServiceBound)
-            mMusicService.onSearchSortAction();
+            mMusicService.stopMedia();
 
         switch (searchBy) {
-            case Constants.SEARCH_NONE:
-                mCursorLoaderSelection = null;
-                mCursorLoaderSelectionArgs = null;
-                break;
             case Constants.SEARCH_BY_ARTIST:
                 mCursorLoaderSelection = Constants.SEARCH_ARTIST_SELECTION;
                 mCursorLoaderSelectionArgs = new String[] { "%" +  searchKey + "%"};
@@ -311,7 +305,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
                 null,
                 mCursorLoaderSelection,
                 mCursorLoaderSelectionArgs,
-                null);
+                MediaStore.Audio.AudioColumns.TITLE + " ASC");
     }
 
     private List<TrackItem> parseCursorData(Cursor data) {
