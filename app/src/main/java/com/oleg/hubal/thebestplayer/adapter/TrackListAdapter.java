@@ -66,12 +66,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                 mViewHolders[mActivePosition].changeSelection(mTrackItems.get(mActivePosition).isSelected());
             }
         }
-
         mTrackItems.get(position).setSelected(true);
         if (mViewHolders[position] != null) {
             mViewHolders[position].changeSelection(mTrackItems.get(position).isSelected());
         }
-
         mActivePosition = position;
     }
 
@@ -99,6 +97,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         private ImageView mAlbumArtImageView;
         private TrackItem mTrackItem;
 
+        private String mTitle;
+        private String mArtist;
+
         public ViewHolder(View itemView) {
             super(itemView);
             mItemView = itemView;
@@ -110,8 +111,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         }
 
         public void onBind(final int position, TrackItem trackItem) {
+            mArtist = trackItem.getArtist();
+            mTitle = trackItem.getTitle();
             mTrackItem = trackItem;
             Picasso.with(mContext).load(trackItem.getAlbumImage()).into(mAlbumArtImageView);
+
             mArtistTextView.setText(String.format(mContext.getString(R.string.artist), trackItem.getArtist()));
             mTitleTextView.setText(String.format(mContext.getString(R.string.title), trackItem.getTitle()));
             mDurationTextView.setText(Utils.parseDurationToDate(trackItem.getDuration()));
