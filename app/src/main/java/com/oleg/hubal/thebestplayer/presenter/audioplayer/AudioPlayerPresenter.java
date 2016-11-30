@@ -115,7 +115,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
             isServiceBound = true;
 
-            if (mMusicService.isTrackListExist()) {
+            if (mMusicService.isTrackListExist() && mMusicService.getCurrentPosition() != -1) {
                 mCurrentItem = mMusicService.getCurrentItem();
                 mView.showTrackInfo(mCurrentItem);
                 isLooping = mMusicService.isLooping();

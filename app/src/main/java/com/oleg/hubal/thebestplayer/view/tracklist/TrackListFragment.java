@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.oleg.hubal.thebestplayer.R;
@@ -28,6 +30,7 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
 
     private static final String TAG = "TrackListFragment";
 
+
     private TrackListPresenterContract mPresenter;
 
     private TrackListAdapter mTrackListAdapter;
@@ -35,6 +38,9 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     private LinearLayoutManager mLayoutManager;
 
     private Spinner mSortSpinner;
+    private Spinner mSearchSpinner;
+    private EditText mSearchKeyEditText;
+    private Button mSearchButton;
 
 //    LISTENERS
 
@@ -91,12 +97,19 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracklist, container, false);
 
-        mSortSpinner = (Spinner) view.findViewById(R.id.spr_sort_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.spinner_sort_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSortSpinner.setAdapter(adapter);
-        mSortSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+        initSpinners(view);
+
+        mSearchKeyEditText = (EditText) view.findViewById(R.id.et_search_key);
+
+        mSearchButton = (Button) view.findViewById(R.id.btn_search);
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String searchKey = mSearchKeyEditText.getText().toString();
+                String searchBy = mSearchSpinner.getSelectedItem().toString();
+                mPresenter.onSearchItems(searchBy, searchKey);
+            }
+        });
 
         RecyclerView trackRecyclerView = (RecyclerView) view.findViewById(R.id.rv_track_list_recycler);
         trackRecyclerView.setHasFixedSize(true);
@@ -109,6 +122,21 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
 
         mPresenter.onFillTrackList();
         return view;
+    }
+
+    private void initSpinners(View view) {
+        mSortSpinner = (Spinner) view.findViewById(R.id.spr_sort_spinner);
+        ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.spinner_sort_array, android.R.layout.simple_spinner_item);
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSortSpinner.setAdapter(sortAdapter);
+        mSortSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+
+        mSearchSpinner = (Spinner) view.findViewById(R.id.spr_search_spinner);
+        ArrayAdapter<CharSequence> searchAdapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.spinner_search_array, android.R.layout.simple_spinner_item);
+        searchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSearchSpinner.setAdapter(searchAdapter);
     }
 
     @Override
@@ -129,6 +157,11 @@ public class TrackListFragment extends Fragment implements TrackListViewContract
     @Override
     public void launchTrackListLoader() {
         getLoaderManager().initLoader(0, null, mPresenter.getTrackListLoader());
+    }
+
+    @Override
+    public void launchLoaderForSearch() {
+        getLoaderManager().restartLoader(0, null, mPresenter.getTrackListLoader());
     }
 
     @Override

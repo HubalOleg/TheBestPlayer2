@@ -18,4 +18,5 @@ public interface TrackListPresenterContract extends BasePresenter {
     void onPause();
     void onResume();
     void onSortItems(String sortBy);
+    void onSearchItems(String searchBy, String searchKey);
 }

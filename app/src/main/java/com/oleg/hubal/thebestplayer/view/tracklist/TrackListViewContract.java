@@ -18,4 +18,5 @@ public interface TrackListViewContract {
     void scrollListToPosition(int position);
     void showSortedList();
     void unSelectAll();
+    void launchLoaderForSearch();
 }

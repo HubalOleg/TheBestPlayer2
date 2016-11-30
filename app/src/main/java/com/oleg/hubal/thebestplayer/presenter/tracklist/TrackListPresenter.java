@@ -52,6 +52,9 @@ public class TrackListPresenter implements TrackListPresenterContract {
 
     private String mCurrentSortOrder = Constants.SORT_NONE;
 
+    private String mCursorLoaderSelection = null;
+    private String[] mCursorLoaderSelectionArgs = null;
+
     private boolean isServiceBound = false;
 
 //    CALLBACK
@@ -159,7 +162,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
                 setQueueListToService();
             }
 
-            if (!mMusicService.isPlaying()) {
+            if (mMusicService.getCurrentPosition() == -1 && mCurrentPosition != -1) {
                 mMusicService.playTrackByPosition(mCurrentPosition);
             }
         }
@@ -263,7 +266,8 @@ public class TrackListPresenter implements TrackListPresenterContract {
             mView.unSelectAll();
 
             if (isServiceBound)
-                mMusicService.stopMedia();
+                mMusicService.onSearchSortAction();
+
 
             switch (sortBy) {
                 case Constants.SORT_BY_DURATION:
@@ -281,12 +285,36 @@ public class TrackListPresenter implements TrackListPresenterContract {
         }
     }
 
+    @Override
+    public void onSearchItems(String searchBy, String searchKey) {
+        mQueueList.clear();
+
+        if (isServiceBound)
+            mMusicService.onSearchSortAction();
+
+        switch (searchBy) {
+            case Constants.SEARCH_NONE:
+                mCursorLoaderSelection = null;
+                mCursorLoaderSelectionArgs = null;
+                break;
+            case Constants.SEARCH_BY_ARTIST:
+                mCursorLoaderSelection = Constants.SEARCH_ARTIST_SELECTION;
+                mCursorLoaderSelectionArgs = new String[] { "%" +  searchKey + "%"};
+                break;
+            case Constants.SEARCH_BY_TITLE:
+                mCursorLoaderSelection = Constants.SEARCH_TITLE_SELECTION;
+                mCursorLoaderSelectionArgs = new String[] { "%" +  searchKey + "%"};
+                break;
+        }
+        mView.launchLoaderForSearch();
+    }
+
     private CursorLoader createCursorLoader() {
         return new CursorLoader(mContext,
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null,
-                null,
-                null,
+                mCursorLoaderSelection,
+                mCursorLoaderSelectionArgs,
                 null);
     }
 

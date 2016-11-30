@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.view.MainActivity;
@@ -294,15 +293,18 @@ public class MusicService extends Service {
     }
 
     public void nextTrack() {
-        unSelectPrevious();
+        if (mCurrentPosition != -1) {
 
-        if (mQueueList.size() == 0) {
-            mCurrentPosition++;
-            sendActionBroadcast(ACTION_NEXT);
-            if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
-            playTrack();
-        } else {
-            playTrackFromQueue();
+            unSelectPrevious();
+
+            if (mQueueList.size() == 0) {
+                mCurrentPosition++;
+                sendActionBroadcast(ACTION_NEXT);
+                if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
+                playTrack();
+            } else {
+                playTrackFromQueue();
+            }
         }
     }
 
@@ -330,11 +332,13 @@ public class MusicService extends Service {
     }
 
     public void previousTrack() {
-        unSelectPrevious();
-        mCurrentPosition--;
-        if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
-        playTrack();
-        sendActionBroadcast(ACTION_PREVIOUS);
+        if (mCurrentPosition != -1) {
+            unSelectPrevious();
+            mCurrentPosition--;
+            if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
+            playTrack();
+            sendActionBroadcast(ACTION_PREVIOUS);
+        }
     }
 
     private void unSelectPrevious() {
@@ -373,9 +377,18 @@ public class MusicService extends Service {
 
     public void stopMedia() {
         stopProgressUpdate();
+        mCurrentPosition = -1;
         mMediaPlayer.stop();
         isPlaying = false;
         sendActionBroadcast(ACTION_STOP);
+    }
+
+    public void onSearchSortAction() {
+        stopMedia();
+        mNotificationBuilder.setContentText("Choose song...")
+                .setContentTitle("");
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
     }
 
     private void updateNotification() {
@@ -390,6 +403,7 @@ public class MusicService extends Service {
 
     public void setTrackItems(List<TrackItem> trackItems) {
         mTrackItems = trackItems;
+        mCurrentPosition = -1;
     }
 
     public List<TrackItem> getTrackItems() {
@@ -405,7 +419,6 @@ public class MusicService extends Service {
     }
 
     public boolean isQueueListExist() {
-        Log.d(TAG, "isQueueListExist: " + mQueueList.size());
         return (mQueueList.size() != 0);
     }
 
