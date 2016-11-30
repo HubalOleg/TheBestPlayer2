@@ -10,7 +10,6 @@ import android.os.IBinder;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.service.AudioPlayerReceiver;
 import com.oleg.hubal.thebestplayer.service.MusicService;
-import com.oleg.hubal.thebestplayer.service.ServiceConstants;
 import com.oleg.hubal.thebestplayer.utility.OnPlayerActionListener;
 import com.oleg.hubal.thebestplayer.utility.Utils;
 import com.oleg.hubal.thebestplayer.view.audioplayer.AudioPlayerViewContract;
@@ -79,15 +78,17 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
 
         @Override
         public void onChangeTrackPosition(long currentPosition) {
-            int position;
-            mCurrentTrackDuration = mCurrentItem.getDuration();
-            mCurrentTrackPosition = currentPosition;
+            if (isServiceBound) {
+                int position;
+                mCurrentTrackDuration = mCurrentItem.getDuration();
+                mCurrentTrackPosition = currentPosition;
 
-            position = (int) (currentPosition * 100 / mCurrentTrackDuration);
+                position = (int) (currentPosition * 100 / mCurrentTrackDuration);
 
-            String stringPosition = Utils.parseDurationToDate(currentPosition);
-            mView.changeSeekBarPosition(position);
-            mView.changeTrackPositionTextView(stringPosition);
+                String stringPosition = Utils.parseDurationToDate(currentPosition);
+                mView.changeSeekBarPosition(position);
+                mView.changeTrackPositionTextView(stringPosition);
+            }
         }
 
         @Override
@@ -156,7 +157,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
             mCurrentTrackDuration = mCurrentItem.getDuration();
             int seekPosition = (int) (mCurrentTrackDuration / 100 * position);
             if (Math.abs(seekPosition - mCurrentTrackPosition) >= 5000) {
-                mMusicService.seekTrackToPosition(seekPosition);
+                mMusicService.seekTrackTo(seekPosition);
                 mView.changeTrackPositionTextView(Utils.parseDurationToDate(seekPosition));
             }
         }
@@ -183,7 +184,7 @@ public class AudioPlayerPresenter implements AudioPlayerPresenterContract {
     @Override
     public void onResume() {
         bindServiceIfExist();
-        IntentFilter filter = new IntentFilter(ServiceConstants.BROADCAST_ACTION);
+        IntentFilter filter = new IntentFilter(AudioPlayerReceiver.BROADCAST_ACTION);
         mContext.registerReceiver(mPlayerReceiver, filter);
     }
 

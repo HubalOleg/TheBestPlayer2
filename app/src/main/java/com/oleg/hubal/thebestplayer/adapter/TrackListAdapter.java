@@ -22,8 +22,8 @@ import java.util.List;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
-    private final Context mContext;
     private OnTrackItemClickListener mOnTrackItemClickListener;
+    private final Context mContext;
     private List<TrackItem> mTrackItems;
     private ViewHolder[] mViewHolders;
 

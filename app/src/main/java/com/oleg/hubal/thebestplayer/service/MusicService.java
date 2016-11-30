@@ -28,14 +28,23 @@ import java.util.List;
  */
 
 public class MusicService extends Service {
+    public static final String ACTION_PLAY = "com.oleg.hubal.thebestplayer.INTENT_PLAY";
+    public static final String ACTION_PAUSE = "com.oleg.hubal.thebestplayer.INTENT_PAUSE";
+    public static final String ACTION_NEXT = "com.oleg.hubal.thebestplayer.INTENT_NEXT";
+    public static final String ACTION_PREVIOUS = "com.oleg.hubal.thebestplayer.INTENT_PLAY_PAUSE";
+    public static final String ACTION_STOP = "com.oleg.hubal.thebestplayer.INTENT_STOP";
+    public static final String ACTION_CHANGE_TRACK = "com.oleg.hubal.thebestplayer.INTENT_CHANGE_TRACK";
+    public static final String ACTION_CHANGE_CURRENT_POSITION = "com.oleg.hubal.thebestplayer.INTENT_CURRENT_POSITION";
+    public static final String ACTION_QUEUE = "com.oleg.hubal.thebestplayer.INTENT_PLAY_FROM_QUEUE";
+
+    private static final int NOTIFICATION_ID = 1121;
+
+    private NotificationCompat.Builder mNotificationBuilder;
 
     private final IBinder mMusicBind = new MusicBinder();
 
-    private List<Integer> mQueueList = new ArrayList();
     private List<TrackItem> mTrackItems;
-
-    private NotificationCompat.Builder mNotificationBuilder;
-    private static final int NOTIFICATION_ID = 0;
+    private List<Integer> mQueueList = new ArrayList();
 
     private MediaSessionManager mManager;
     private MediaController mController;
@@ -46,18 +55,19 @@ public class MusicService extends Service {
     private boolean isPlaying = false;
     private boolean isLooping = false;
 
-    Handler mUpdateProgressHandler = new Handler();
+    Handler mSeekHandler = new Handler();
 
 //    Listeners
+
     private MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
         @Override
         public void onPrepared(MediaPlayer mediaPlayer) {
-            stopUpdateTrackProgress();
+            stopProgressUpdate();
             mediaPlayer.start();
+            sendActionBroadcast(ACTION_CHANGE_TRACK);
             isPlaying = true;
             updateNotification();
-            startUpdateTrackProgress();
-            sendActionBroadcast(ServiceConstants.ACTION_CHANGE_TRACK);
+            startProgressUpdate();
         }
     };
 
@@ -72,25 +82,44 @@ public class MusicService extends Service {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
             if (isLooping) {
-                playTrack();
+                if (mCurrentPosition != -1) {
+                    playTrack();
+                }
             } else {
                 nextTrack();
             }
         }
     };
 
-    private Runnable mUpdateProgressRunnable = new Runnable() {
+    private Runnable mUpdateRunnable = new Runnable() {
         @Override
         public void run() {
-            Intent intent = new Intent(ServiceConstants.BROADCAST_ACTION);
-            intent.putExtra(ServiceConstants.PARAM_ACTION, ServiceConstants.ACTION_CHANGE_CURRENT_POSITION);
-            intent.putExtra(ServiceConstants.PARAM_CURRENT_POSITION, mMediaPlayer.getCurrentPosition());
+            Intent intent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+            intent.putExtra(AudioPlayerReceiver.PARAM_ACTION, ACTION_CHANGE_CURRENT_POSITION);
+            intent.putExtra(AudioPlayerReceiver.PARAM_CURRENT_POSITION, mMediaPlayer.getCurrentPosition());
             sendBroadcast(intent);
-            mUpdateProgressHandler.postDelayed(mUpdateProgressRunnable, 500);
+            mSeekHandler.postDelayed(mUpdateRunnable, 500);
         }
     };
 
 //    Listeners end
+
+    public void setTrackItems(List<TrackItem> trackItems) {
+        mTrackItems = trackItems;
+        mCurrentPosition = -1;
+    }
+
+    public List<TrackItem> getTrackItems() {
+        return mTrackItems;
+    }
+
+    public void setQueueList(List<Integer> queueList) {
+        mQueueList = queueList;
+    }
+
+    public List<Integer> getQueueList() {
+        return mQueueList;
+    }
 
     public boolean isQueueListExist() {
         return (mQueueList.size() != 0);
@@ -104,14 +133,13 @@ public class MusicService extends Service {
         return (mTrackItems != null);
     }
 
-    public boolean isLooping() {
-        return isLooping;
-    }
-
     public void setLooping(boolean isLooping) {
         this.isLooping = isLooping;
     }
 
+    public boolean isLooping() {
+        return isLooping;
+    }
     public TrackItem getCurrentItem() {
         return mTrackItems.get(mCurrentPosition);
     }
@@ -120,21 +148,7 @@ public class MusicService extends Service {
         return mCurrentPosition;
     }
 
-    public List<Integer> getQueueList() {
-        return mQueueList;
-    }
 
-    public void setQueueList(List<Integer> queueList) {
-        mQueueList = queueList;
-    }
-
-    public List<TrackItem> getTrackItems() {
-        return mTrackItems;
-    }
-
-    public void setTrackItems(List<TrackItem> trackItems) {
-        mTrackItems = trackItems;
-        mCurrentPosition = -1;}
 
     @Nullable
     @Override
@@ -143,10 +157,17 @@ public class MusicService extends Service {
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        mSession.release();
+        return false;
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
         initMediaPlayer();
+
         initMediaSession();
 
         createNotification();
@@ -156,6 +177,7 @@ public class MusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         handleIntent(intent);
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -163,23 +185,31 @@ public class MusicService extends Service {
         if (intent == null || intent.getAction() == null)
             return;
 
-        switch (intent.getAction()) {
-            case ServiceConstants.ACTION_PLAY:
+        String action = intent.getAction();
+
+        switch (action) {
+            case ACTION_PLAY:
                 mController.getTransportControls().play();
                 break;
-            case ServiceConstants.ACTION_PAUSE:
+            case ACTION_PAUSE:
                 mController.getTransportControls().pause();
                 break;
-            case ServiceConstants.ACTION_NEXT:
+            case ACTION_NEXT:
                 mController.getTransportControls().skipToNext();
                 break;
-            case ServiceConstants.ACTION_PREVIOUS:
+            case ACTION_PREVIOUS:
                 mController.getTransportControls().skipToPrevious();
                 break;
-            case ServiceConstants.ACTION_STOP:
+            case ACTION_STOP:
                 mController.getTransportControls().stop();
                 break;
         }
+    }
+
+    private void sendActionBroadcast(String action) {
+        Intent broadcastIntent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+        broadcastIntent.putExtra(AudioPlayerReceiver.PARAM_ACTION, action);
+        sendBroadcast(broadcastIntent);
     }
 
     private void initMediaPlayer() {
@@ -223,7 +253,9 @@ public class MusicService extends Service {
             public void onStop() {
                 super.onStop();
                 stopMedia();
-                stopUpdateTrackProgress();
+
+                stopProgressUpdate();
+
 
                 Intent intent = new Intent(getApplicationContext(), MusicService.class);
                 stopService(intent);
@@ -233,6 +265,14 @@ public class MusicService extends Service {
                 startActivity(in);
             }
         });
+    }
+
+    private NotificationCompat.Action generateAction(int icon, String title, String intentAction) {
+        Intent intent = new Intent(getApplicationContext(), MusicService.class);
+        intent.setAction(intentAction);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1, intent, 0);
+
+        return new NotificationCompat.Action.Builder(icon, title, pendingIntent).build();
     }
 
     private void createNotification() {
@@ -252,73 +292,12 @@ public class MusicService extends Service {
                 .setContentIntent(notifyPendingIntent)
                 .setAutoCancel(false)
                 .setPriority(Notification.PRIORITY_MAX)
-                .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ServiceConstants.ACTION_PREVIOUS))
-                .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ServiceConstants.ACTION_PLAY))
-                .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ServiceConstants.ACTION_PAUSE))
-                .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ServiceConstants.ACTION_NEXT))
-                .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", ServiceConstants.ACTION_STOP))
+                .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
+                .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY))
+                .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE))
+                .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
+                .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", ACTION_STOP))
                 .setStyle(new NotificationCompat.MediaStyle().setShowCancelButton(true));
-    }
-
-    private NotificationCompat.Action generateAction(int icon, String title, String intentAction) {
-        Intent intent = new Intent(getApplicationContext(), MusicService.class);
-        intent.setAction(intentAction);
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 1, intent, 0);
-
-        return new NotificationCompat.Action.Builder(icon, title, pendingIntent).build();
-    }
-
-    private void playTrackFromQueue() {
-        mCurrentPosition = mQueueList.get(0);
-        mTrackItems.get(mCurrentPosition).setQueuePosition(-1);
-        mQueueList.remove(0);
-
-        for (int i : mQueueList) {
-            TrackItem queueItem = mTrackItems.get(i);
-            int oldPosition = queueItem.getQueuePosition();
-            queueItem.setQueuePosition(oldPosition - 1);
-        }
-
-        sendQueueBroadcast();
-
-        playTrack();
-    }
-
-    private void sendQueueBroadcast() {
-        Intent queueIntent = new Intent(ServiceConstants.BROADCAST_ACTION);
-        queueIntent.putExtra(ServiceConstants.PARAM_ACTION, ServiceConstants.ACTION_QUEUE);
-        queueIntent.putExtra(ServiceConstants.PARAM_QUEUE_POSITION, mCurrentPosition);
-        sendBroadcast(queueIntent);
-    }
-
-    public void nextTrack() {
-        if (mCurrentPosition != -1) {
-
-            unSelectPrevious();
-
-            if (mQueueList.size() == 0) {
-                mCurrentPosition++;
-                sendActionBroadcast(ServiceConstants.ACTION_NEXT);
-                if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
-                playTrack();
-            } else {
-                playTrackFromQueue();
-            }
-        }
-    }
-
-    public void previousTrack() {
-        if (mCurrentPosition != -1) {
-            unSelectPrevious();
-            mCurrentPosition--;
-            if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
-            playTrack();
-            sendActionBroadcast(ServiceConstants.ACTION_PREVIOUS);
-        }
-    }
-
-    private void unSelectPrevious() {
-        mTrackItems.get(mCurrentPosition).setSelected(false);
     }
 
     public void playTrackByPosition(int position) {
@@ -342,40 +321,95 @@ public class MusicService extends Service {
         }
     }
 
-    public void resumeTrack() {
-        if (mMediaPlayer != null && !isPlaying) {
-            startUpdateTrackProgress();
-            mMediaPlayer.start();
-            isPlaying = true;
-            sendActionBroadcast(ServiceConstants.ACTION_PLAY);
+    public void nextTrack() {
+        if (mCurrentPosition != -1) {
+
+            unSelectPrevious();
+
+            if (mQueueList.size() == 0) {
+                mCurrentPosition++;
+                sendActionBroadcast(ACTION_NEXT);
+                if (mCurrentPosition >= mTrackItems.size()) mCurrentPosition = 0;
+                playTrack();
+            } else {
+                playTrackFromQueue();
+            }
         }
+    }
+
+    private void playTrackFromQueue() {
+        mCurrentPosition = mQueueList.get(0);
+        mTrackItems.get(mCurrentPosition).setQueuePosition(-1);
+        mQueueList.remove(0);
+
+        for (int i : mQueueList) {
+            TrackItem queueItem = mTrackItems.get(i);
+            int oldPosition = queueItem.getQueuePosition();
+            queueItem.setQueuePosition(oldPosition - 1);
+        }
+
+        sendQueueBroadcast();
+
+        playTrack();
+    }
+
+    private void sendQueueBroadcast() {
+        Intent queueIntent = new Intent(AudioPlayerReceiver.BROADCAST_ACTION);
+        queueIntent.putExtra(AudioPlayerReceiver.PARAM_ACTION, ACTION_QUEUE);
+        queueIntent.putExtra(AudioPlayerReceiver.PARAM_QUEUE_POSITION, mCurrentPosition);
+        sendBroadcast(queueIntent);
+    }
+
+    public void previousTrack() {
+        if (mCurrentPosition != -1) {
+            unSelectPrevious();
+            mCurrentPosition--;
+            if (mCurrentPosition < 0) mCurrentPosition = mTrackItems.size() - 1;
+            playTrack();
+            sendActionBroadcast(ACTION_PREVIOUS);
+        }
+    }
+
+    private void unSelectPrevious() {
+        mTrackItems.get(mCurrentPosition).setSelected(false);
     }
 
     public void pauseTrack() {
         if (mMediaPlayer != null && isPlaying) {
-            stopUpdateTrackProgress();
+            stopProgressUpdate();
             mMediaPlayer.pause();
             isPlaying = false;
-            sendActionBroadcast(ServiceConstants.ACTION_PAUSE);
+            sendActionBroadcast(ACTION_PAUSE);
         }
     }
 
-    public void stopMedia() {
-        stopUpdateTrackProgress();
-        mCurrentPosition = -1;
-        mMediaPlayer.stop();
-        isPlaying = false;
-        sendActionBroadcast(ServiceConstants.ACTION_STOP);
+    public void resumeTrack() {
+        if (mMediaPlayer != null && !isPlaying) {
+            startProgressUpdate();
+            mMediaPlayer.start();
+            isPlaying = true;
+            sendActionBroadcast(ACTION_PLAY);
+        }
     }
 
-    public void seekTrackToPosition(int position) {
+    public void seekTrackTo(int position) {
         mMediaPlayer.seekTo(position);
     }
 
-    private void sendActionBroadcast(String action) {
-        Intent broadcastIntent = new Intent(ServiceConstants.BROADCAST_ACTION);
-        broadcastIntent.putExtra(ServiceConstants.PARAM_ACTION, action);
-        sendBroadcast(broadcastIntent);
+    public void stopMedia() {
+        stopProgressUpdate();
+        mCurrentPosition = -1;
+        mMediaPlayer.stop();
+        isPlaying = false;
+        sendActionBroadcast(ACTION_STOP);
+    }
+
+    private void startProgressUpdate() {
+        mSeekHandler.post(mUpdateRunnable);
+    }
+
+    private void stopProgressUpdate() {
+        mSeekHandler.removeCallbacks(mUpdateRunnable);
     }
 
     public void onSearchSortAction() {
@@ -394,20 +428,6 @@ public class MusicService extends Service {
                 .setContentTitle(title);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
-    }
-
-    private void startUpdateTrackProgress() {
-        mUpdateProgressHandler.post(mUpdateProgressRunnable);
-    }
-
-    private void stopUpdateTrackProgress() {
-        mUpdateProgressHandler.removeCallbacks(mUpdateProgressRunnable);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        mSession.release();
-        return false;
     }
 
     public class MusicBinder extends Binder {
