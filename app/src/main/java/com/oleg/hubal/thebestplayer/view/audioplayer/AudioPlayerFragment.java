@@ -107,14 +107,10 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
@@ -128,7 +124,7 @@ public class AudioPlayerFragment extends Fragment implements AudioPlayerViewCont
 
     private void updateUI() {
         mTrackPositionSeekBack.setProgress(0);
-        mTrackPositionTextView.setText("00:00");
+        mTrackPositionTextView.setText(R.string.position_start);
     }
 
     @Override

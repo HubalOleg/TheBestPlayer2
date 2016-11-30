@@ -5,6 +5,9 @@
     <string name="permissions_not_granted">Permissions were not granted.</string>
     <string name="ok">OK</string>
     <string name="duration_none">--:--</string>
+    <string name="title">Title: %1$s</string>
+    <string name="artist">Artist: %1$s</string>
+    <string name="position_start">00:00</string>
     <string-array name="spinner_sort_array">
         <item>No sort</item>
         <item>Title</item>

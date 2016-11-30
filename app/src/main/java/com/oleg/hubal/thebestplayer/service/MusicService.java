@@ -1,11 +1,13 @@
 package com.oleg.hubal.thebestplayer.service;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -16,6 +18,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 
+import com.oleg.hubal.thebestplayer.R;
 import com.oleg.hubal.thebestplayer.model.TrackItem;
 import com.oleg.hubal.thebestplayer.view.MainActivity;
 
@@ -276,6 +279,8 @@ public class MusicService extends Service {
     }
 
     private void createNotification() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+
         Intent notifyIntent = new Intent(getApplicationContext(), MainActivity.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent notifyPendingIntent =
@@ -287,17 +292,17 @@ public class MusicService extends Service {
 
         mNotificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
                 .setSmallIcon(android.R.drawable.ic_media_play)
+                .setLargeIcon(bitmap)
                 .setContentTitle("Track title")
                 .setContentText("Artist - album")
                 .setContentIntent(notifyPendingIntent)
                 .setAutoCancel(false)
-                .setPriority(Notification.PRIORITY_MAX)
                 .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
                 .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY))
                 .addAction(generateAction(android.R.drawable.ic_media_pause, "Pause", ACTION_PAUSE))
                 .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
                 .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", ACTION_STOP))
-                .setStyle(new NotificationCompat.MediaStyle().setShowCancelButton(true));
+                .setStyle(new NotificationCompat.MediaStyle());
     }
 
     public void playTrackByPosition(int position) {
@@ -420,14 +425,31 @@ public class MusicService extends Service {
         notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
     }
 
+    private static final String TAG = "MusicService";
+
     private void updateNotification() {
+        Bitmap bitmap = getAlbumArt();
+
+
         String artist = mTrackItems.get(mCurrentPosition).getArtist();
         String title = mTrackItems.get(mCurrentPosition).getTitle();
 
         mNotificationBuilder.setContentText(artist)
+                .setLargeIcon(bitmap)
                 .setContentTitle(title);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+    }
+
+    private Bitmap getAlbumArt() {
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(mTrackItems.get(mCurrentPosition).getPath());
+        byte[] data = mmr.getEmbeddedPicture();
+        if (data != null) {
+            return BitmapFactory.decodeByteArray(data, 0, data.length);
+        } else {
+            return BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+        }
     }
 
     public class MusicBinder extends Binder {
