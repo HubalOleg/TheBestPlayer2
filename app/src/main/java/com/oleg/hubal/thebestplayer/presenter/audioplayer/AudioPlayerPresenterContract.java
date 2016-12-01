@@ -8,7 +8,6 @@ public interface AudioPlayerPresenterContract {
     void onPlayPauseTrack();
     void onNextTrack();
     void onPreviousTrack();
-
     void onPause();
     void onResume();
     void onSeekTrackTo(int position);

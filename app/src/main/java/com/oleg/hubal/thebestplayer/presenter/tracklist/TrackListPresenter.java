@@ -344,6 +344,7 @@ public class TrackListPresenter implements TrackListPresenterContract {
     @Override
     public void onPause() {
         mContext.unregisterReceiver(mPlayerReceiver);
+
         if (isServiceBound) {
             mContext.unbindService(mMusicServiceConnection);
             isServiceBound = false;
